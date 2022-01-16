@@ -563,3 +563,28 @@ a.btn {
 
 .vpower {
   display: none !important; }
+
+.gt-container .gt-link {
+  border-bottom: 1px dotted #5F5F5F !important; }
+
+.gt-container .gt-header-controls-tip {
+  color: #5F5F5F !important; }
+
+.gt-container .gt-btn-preview {
+  color: #5F5F5F !important; }
+
+.gt-container .gt-btn {
+  border: 1px solid #5F5F5F !important;
+  background-color: #5F5F5F !important; }
+
+.gt-container a {
+  color: #5F5F5F !important; }
+
+.gt-container .gt-comment-username {
+  color: #5F5F5F !important; }
+
+.gt-container .gt-svg svg {
+  fill: #5F5F5F !important; }
+
+.gt-container .gt-btn-preview {
+  background-color: #fff !important; }
