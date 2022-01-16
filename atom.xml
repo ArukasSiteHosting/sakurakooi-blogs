@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>SakuraKooi</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://blog,sakurakooi,cyou/"/>
+  <updated>2022-01-16T11:27:40.548Z</updated>
+  <id>https://blog,sakurakooi,cyou/</id>
+  
+  <author>
+    <name>SakuraKooi</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="https://blog,sakurakooi,cyou/2022/01/03/hello-world/"/>
+    <id>https://blog,sakurakooi,cyou/2022/01/03/hello-world/</id>
+    <published>2022-01-03T08:14:17.852Z</published>
+    <updated>2022-01-16T11:27:40.548Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="诶嘿，这里是SakuraKooi-lt-ゝω·-☆"><a href="#诶嘿，这里是SakuraKooi-lt-ゝω·-☆" class="headerlink" title="诶嘿，这里是SakuraKooi (&lt;ゝω·) ~☆"></a>诶嘿，这里是SakuraKooi (&lt;ゝω·) ~☆</h3><p><strong>花了一下午把blog架起来了 (好耶!</strong></p><h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>用的Hexo, 别问, 问就是白嫖Github pages ο(=•ω＜=)ρ⌒☆</p><p>主题用的Anatole-Core, 简洁的界面设计很戳咱的XP</p><p>后续有空可能会加个大背景图, 再上个particle.js</p><p>但风格应该就是这样了, 不会整的花花绿绿的</p><p><strong>咱可是Flat主义 (点头</strong></p><p>主题自带的Valine评论不知道是什么情况LeanCloud连不上</p><p>不挂梯子RESET, 挂了梯子TIMEOUT</p><p>直接换成了gitalk, 稍微把css改了一下以符合站点风格</p><h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><p><strong>虽然是把blog架起来了, 但咱打算更点啥还真不是那么有想法qwq</strong></p><p>会发在这个站上的话…这应该算是个技术博客?</p><h3 id="1-折腾技术"><a href="#1-折腾技术" class="headerlink" title="1. 折腾技术"></a>1. 折腾技术</h3><p>记一些研究过的东西吧, 以及踩过的坑和解决啥的</p><p>回头往后看大概会挺有成就感? (虽然更大的可能是咕咕咕 (x</p><h3 id="2-奇奇怪怪的东西"><a href="#2-奇奇怪怪的东西" class="headerlink" title="2. 奇奇怪怪的东西?"></a>2. 奇奇怪怪的东西?</h3><p>qw暂时想不到了, 想起来新的东西就随时修改增加吧(躺</p><blockquote><p>大概这个网站会成为年更番.jpg? (逃</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
