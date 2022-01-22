@@ -144,7 +144,7 @@ a:hover, a:active {
   width: 30%;
   -webkit-background-size: cover;
   background-size: cover;
-  background-color: #fff;
+  background-color: #eeea;
   height: 100%;
   transition: 0.8s;
   top: 0;
@@ -188,7 +188,7 @@ a:hover, a:active {
       color: #4786D6; }
 
 .post {
-  background-color: #FFF;
+  background-color: #FFFa;
   margin: 30px; }
   .post .post-title h1 {
     text-transform: uppercase;
@@ -591,3 +591,11 @@ a.btn {
 
 .gt-container .gt-comment-admin .gt-comment-content {
   background-color: #f6f9f9 !important; }
+
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1; }
