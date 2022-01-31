@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog,sakurakooi,cyou/"/>
-  <updated>2022-01-16T11:27:40.548Z</updated>
+  <updated>2022-01-31T04:37:40.431Z</updated>
   <id>https://blog,sakurakooi,cyou/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Android 实现每天早上关闭指纹解锁 强制使用图案或密码</title>
+    <link href="https://blog,sakurakooi,cyou/2022/01/30/Android-%E5%AE%9E%E7%8E%B0%E6%AF%8F%E5%A4%A9%E6%97%A9%E4%B8%8A%E5%85%B3%E9%97%AD%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81-%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E5%9B%BE%E6%A1%88%E6%88%96%E5%AF%86%E7%A0%81/"/>
+    <id>https://blog,sakurakooi,cyou/2022/01/30/Android-实现每天早上关闭指纹解锁-强制使用图案或密码/</id>
+    <published>2022-01-30T00:52:09.000Z</published>
+    <updated>2022-01-31T04:37:40.431Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><blockquote><p>咱是真没想到吃瓜能啃到自己身上</p></blockquote><p>早上醒了但没起床在被子里躺着, 听见我爸和我妈说趁我睡着拿指纹解锁手机</p><p>人都麻了, 网上啃的瓜居然能啃到自己身上, 还好听见了属于是</p><p>虽然还没有发生, 但必须得防着点了</p><p>我特喵的, 心情复杂.jpg</p><h3 id="折腾"><a href="#折腾" class="headerlink" title="折腾"></a>折腾</h3><blockquote><p>关闭指纹解锁不考虑, 太不方便了</p></blockquote><p>首先想到的是解锁手机时拍照, 但找了一下现成的工具, 基本上不支持指纹解锁, 再一想特喵的事后.jpg管啥用</p><p>然后考虑了每天的第一次解锁禁用指纹, 强制要求输入密码</p><p>这个android是有现成的, 每次开机后都需要输入密码才能使用指纹</p><p>之前刷推也有看见睡觉之前重启手机这样的建议</p><p>但总会有忘记的时候, 百密一疏就完蛋了</p><p>因此考虑找找有没有能改出这个刚开机的禁用指纹的状态的magisk或者xposed模块</p><p>然而经过了一番寻找并没有(悲</p><p>考虑使用scene定时运行shell跑reboot来重启手机, 但感觉可能会干掉一些后台服务, 如果实在没有解决方案再考虑这个思路</p><p>换个思路, 找了找有没有不能使用指纹解锁的情况, 发现了<a href="https://forum.xda-developers.com/t/device-administrator-locked-device-when-unlocking-with-fingerprint.3491177/">这个帖子</a></p><blockquote><p>sometimes the lock screen take me straight to pattern lock and the message “device administrator locked device” appears on the screen.</p></blockquote><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><blockquote><p><a href="https://developer.android.com/reference/android/app/admin/DevicePolicyManager#lockNow()">DevicePolicyManager.lockNow()</a></p><p>This method secures the device in response to an urgent situation, such as a lost or stolen device. <strong>After this method is called, the device must be unlocked using strong authentication (PIN, pattern, or password)</strong>. This API is intended for use only by device admins.</p></blockquote><h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><ol><li><p>通过发送 <code>android.app.action.ADD_DEVICE_ADMIN</code> Intent来请求设备管理员权限</p></li><li><p>使用 <code>AlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, start, period, PendingIntent)</code> 创建定时任务</p></li><li><p>每天晚上调用一次 <code>DevicePolicyManager.lockNow()</code> </p></li><li><p>DONE! 第二天必须手动输入密码一次才能继续使用指纹解锁 :)</p><blockquote><p>人脸识别应该也可以</p></blockquote></li></ol><h3 id="开源"><a href="#开源" class="headerlink" title="开源"></a>开源</h3><p><a href="https://github.com/SakuraKoi/FingerprintBlocker">https://github.com/SakuraKoi/FingerprintBlocker</a></p><p><a href="https://github.com/SakuraKoi/FingerprintBlocker/releases/download/v1/app-release.apk">下载编译好的apk qwq</a></p><hr><blockquote><p><strong>愿每个人都能被这个世界温柔以待</strong></p></blockquote><p><small><em>真是没想到别的没写先写出来个这玩意, 蚌埠住了</em></small></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+      
+    
+    </summary>
+    
+    
+      <category term="Android" scheme="https://blog,sakurakooi,cyou/tags/Android/"/>
+    
+      <category term="隐私" scheme="https://blog,sakurakooi,cyou/tags/%E9%9A%90%E7%A7%81/"/>
+    
+  </entry>
   
   <entry>
     <title>Hello World</title>

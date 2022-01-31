@@ -1,0 +1,183 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="SakuraKooi"><title>Android 实现每天早上关闭指纹解锁 强制使用图案或密码 · SakuraKooi</title><meta name="description" content="背景
+咱是真没想到吃瓜能啃到自己身上
+
+早上醒了但没起床在被子里躺着, 听见我爸和我妈说趁我睡着拿指纹解锁手机
+人都麻了, 网上啃的瓜居然能啃到自己身上, 还好听见了属于是
+虽然还没有发生, 但必须得防着点了
+我特喵的, 心情复杂.jpg
+折腾
+关闭指纹解锁不考虑, 太不方便了
+
+首先想到的是解锁手"><meta name="keywords" content="SakuraKooi"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 6.0.0"></head><body><div id="particles"></div><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;margin-bottom: 1em;filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.3));"><h3 title=""><a href="/">SakuraKooi</a></h3><div class="description"><p>The darkest night has the brightest star</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/SakuraKoi"><i class="fa fa-github"></i></a></li><li><a href="mailto:root@sakurakooi.cyou"><i class="fa fa-envelope"></i></a></li><li><a target="_blank" rel="noopener" href="https://twitter.com/SakuraKooi"><i class="fa fa-twitter"></i></a></li><li><a target="_blank" rel="noopener" href="https://steamcommunity.com/id/SakuraKooi"><i class="fa fa-steam">   </i></a></li><li><a target="_blank" rel="noopener" href="https://www.origin.com/hkg/en-us/search?searchString=SakuraKooi"><i class="fa fa-gamepad"></i></a></li></ul><div class="footer"><div class="p"> <span>© 2021 </span><i class="fa fa-star"></i><span> SakuraKooi</span></div><div class="by_farbox"><span>Powered by </span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo </a><span> & Theme by </span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core  </a></div><div class="beian"><img src="/images/moeicp.png" style="height:10px;margin-left: 10px;position: relative;top: 1px;"><a href="https://icp.gov.moe/?keyword=20224987" target="_blank" style="margin-left: 2px;">萌ICP备20224987号</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Android 实现每天早上关闭指纹解锁 强制使用图案或密码</a></h3></div><div class="post-content"><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><blockquote>
+<p>咱是真没想到吃瓜能啃到自己身上</p>
+</blockquote>
+<p>早上醒了但没起床在被子里躺着, 听见我爸和我妈说趁我睡着拿指纹解锁手机</p>
+<p>人都麻了, 网上啃的瓜居然能啃到自己身上, 还好听见了属于是</p>
+<p>虽然还没有发生, 但必须得防着点了</p>
+<p>我特喵的, 心情复杂.jpg</p>
+<h3 id="折腾"><a href="#折腾" class="headerlink" title="折腾"></a>折腾</h3><blockquote>
+<p>关闭指纹解锁不考虑, 太不方便了</p>
+</blockquote>
+<p>首先想到的是解锁手机时拍照, 但找了一下现成的工具, 基本上不支持指纹解锁, 再一想特喵的事后.jpg管啥用</p>
+<p>然后考虑了每天的第一次解锁禁用指纹, 强制要求输入密码</p>
+<p>这个android是有现成的, 每次开机后都需要输入密码才能使用指纹</p>
+<p>之前刷推也有看见睡觉之前重启手机这样的建议</p>
+<p>但总会有忘记的时候, 百密一疏就完蛋了</p>
+<p>因此考虑找找有没有能改出这个刚开机的禁用指纹的状态的magisk或者xposed模块</p>
+<p>然而经过了一番寻找并没有(悲</p>
+<p>考虑使用scene定时运行shell跑reboot来重启手机, 但感觉可能会干掉一些后台服务, 如果实在没有解决方案再考虑这个思路</p>
+<p>换个思路, 找了找有没有不能使用指纹解锁的情况, 发现了<a target="_blank" rel="noopener" href="https://forum.xda-developers.com/t/device-administrator-locked-device-when-unlocking-with-fingerprint.3491177/">这个帖子</a></p>
+<blockquote>
+<p>sometimes the lock screen take me straight to pattern lock and the message “device administrator locked device” appears on the screen.</p>
+</blockquote>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/android/app/admin/DevicePolicyManager#lockNow()">DevicePolicyManager.lockNow()</a></p>
+<p>This method secures the device in response to an urgent situation, such as a lost or stolen device. <strong>After this method is called, the device must be unlocked using strong authentication (PIN, pattern, or password)</strong>. This API is intended for use only by device admins.</p>
+</blockquote>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><ol>
+<li><p>通过发送 <code>android.app.action.ADD_DEVICE_ADMIN</code> Intent来请求设备管理员权限</p>
+</li>
+<li><p>使用 <code>AlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, start, period, PendingIntent)</code> 创建定时任务</p>
+</li>
+<li><p>每天晚上调用一次 <code>DevicePolicyManager.lockNow()</code> </p>
+</li>
+<li><p>DONE! 第二天必须手动输入密码一次才能继续使用指纹解锁 :)</p>
+<blockquote>
+<p>人脸识别应该也可以</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="开源"><a href="#开源" class="headerlink" title="开源"></a>开源</h3><p><a target="_blank" rel="noopener" href="https://github.com/SakuraKoi/FingerprintBlocker">https://github.com/SakuraKoi/FingerprintBlocker</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/SakuraKoi/FingerprintBlocker/releases/download/v1/app-release.apk">下载编译好的apk qwq</a></p>
+<hr>
+<blockquote>
+<p><strong>愿每个人都能被这个世界温柔以待</strong></p>
+</blockquote>
+<p><small><em>真是没想到别的没写先写出来个这玩意, 蚌埠住了</em></small></p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-01-30</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Android/" title="Android">Android </a><a class="tag" href="/tags/隐私/" title="隐私">隐私 </a><span class="leancloud_visitors"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/01/03/hello-world/" title="Hello World">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><a id="comments"></a><div id="gitalk-container" style="margin: 0 30px 30px 30px;"></div><script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css"><script>const gitalk = new Gitalk({
+  clientID: '6704fe160be4c8144896',
+  clientSecret: 'f05e0417ce056a591b3cf3cd628143f3f00bb9d2',
+  repo: 'sakurakooi-blogs',      // The repository of store comments,
+  owner: 'ArukasSiteHosting',
+  admin: ['SakuraKoi'],
+  id: window.location.pathname,
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script>var OriginTitile=document.title,st;
+document.addEventListener("visibilitychange",function(){
+    document.hidden ? 
+        (document.title="诶!? 不许跑喵~",clearTimeout(st)) : 
+        (document.title=OriginTitile, st=setTimeout(function(){
+            document.title=OriginTitile;
+        },3e3))
+    }
+);</script><script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script><script>particlesJS("particles", {
+    "particles": {
+      "number": {
+        "value": 95,
+        "density": {
+          "enable": true,
+          "value_area": 2446.3576890600452
+        }
+      },
+      "color": {
+        "value": "#bbbbbb"
+      },
+      "shape": {
+        "type": "polygon",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 6
+        },
+        "image": {
+          "src": "img/github.svg",
+          "width": 100,
+          "height": 100
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": false,
+        "anim": {
+          "enable": false,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 1.5,
+        "random": true,
+        "anim": {
+          "enable": false,
+          "speed": 40,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#bbbbbb",
+        "opacity": 0.6,
+        "width": 1.5
+      },
+      "move": {
+        "enable": true,
+        "speed": 2,
+        "direction": "none",
+        "random": false,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": false,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
+      }
+    },
+    "interactivity": {
+      "detect_on": "window",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "bubble"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "repulse"
+        },
+        "resize": true
+      },
+      "modes": {
+        "grab": {
+          "distance": 400,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 2,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 147.597845071462,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
+      }
+    },
+    "retina_detect": true
+  });</script></body></html>
