@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="SakuraKooi"><title>记Windows编译sentry-native集成Qt · SakuraKooi</title><meta name="description" content="官方文档: https://docs.sentry.io/platforms/native/guides/qt/
+一篇笔记, 也是备忘
+
+crashpad编码的坑crashpad的源代码全是UTF-8 without BOM
+编译的时候一串的 C4819 该文件包含不能在当前代码页中表示的字符 满屏"><meta name="keywords" content="SakuraKooi"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 6.0.0"></head><body><div id="particles"></div><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width: 127px; margin-bottom: 1em;filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.3)); border-radius: 50%;"><h3 title=""><a href="/">SakuraKooi</a></h3><div class="description"><p>The darkest night has the brightest star</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/SakuraKoi"><i class="fa fa-github"></i></a></li><li><a href="mailto:root@sakurakooi.cyou"><i class="fa fa-envelope"></i></a></li><li><a target="_blank" rel="noopener" href="https://twitter.com/SakuraKooi"><i class="fa fa-twitter"></i></a></li><li><a target="_blank" rel="noopener" href="https://steamcommunity.com/id/SakuraKooi"><i class="fa fa-steam">   </i></a></li><li><a target="_blank" rel="noopener" href="https://www.origin.com/hkg/en-us/search?searchString=SakuraKooi"><i class="fa fa-gamepad"></i></a></li></ul><div class="footer"><div class="p"> <span>© 2021 </span><i class="fa fa-star"></i><span> SakuraKooi</span></div><div class="by_farbox"><span>Powered by </span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo </a><span> & Theme by </span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core  </a></div><div class="beian"><img src="/images/moeicp.png" style="height:10px;margin-left: 10px;position: relative;top: 1px;"><a href="https://icp.gov.moe/?keyword=20224987" target="_blank" style="margin-left: 2px;">萌ICP备20224987号</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>记Windows编译sentry-native集成Qt</a></h3></div><div class="post-content"><h3 id="官方文档-https-docs-sentry-io-platforms-native-guides-qt"><a href="#官方文档-https-docs-sentry-io-platforms-native-guides-qt" class="headerlink" title="官方文档: https://docs.sentry.io/platforms/native/guides/qt/"></a>官方文档: <a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/native/guides/qt/">https://docs.sentry.io/platforms/native/guides/qt/</a></h3><blockquote>
+<p>一篇笔记, 也是备忘</p>
+</blockquote>
+<h2 id="crashpad编码的坑"><a href="#crashpad编码的坑" class="headerlink" title="crashpad编码的坑"></a>crashpad编码的坑</h2><p>crashpad的源代码全是UTF-8 without BOM</p>
+<p>编译的时候一串的 <code>C4819 该文件包含不能在当前代码页中表示的字符</code> 满屏飘红</p>
+<p>咱这里有cygwin的zsh环境所以简单粗暴批量加BOM</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># for zsh</span></span><br><span class="line"><span class="built_in">setopt</span> no_nomatch</span><br><span class="line"><span class="built_in">setopt</span> nullglob</span><br><span class="line"><span class="comment"># for bash</span></span><br><span class="line"><span class="built_in">shopt</span> -s nullglob</span><br><span class="line"></span><br><span class="line"><span class="comment"># the real job</span></span><br><span class="line"><span class="keyword">for</span> f <span class="keyword">in</span> *.&#123;h,cc,c,cpp&#125;; <span class="keyword">do</span> sed -i <span class="string">&#x27;1s/^\(\xef\xbb\xbf\)\?/\xef\xbb\xbf/&#x27;</span> <span class="variable">$f</span>; <span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Qt目录识别"><a href="#Qt目录识别" class="headerlink" title="Qt目录识别"></a>Qt目录识别</h2><p>设置SENTRY_INTEGRATION_QT=YES后手动在CMAKE_PREFIX_PATH添加qt的目录</p>
+<p>官方文档说的是安装目录</p>
+<p>但实际上需要设置为<code>where/qt/installed/at/lib/cmake/Qt5</code>才能正确识别</p>
+<h2 id="拖着个crashpad程序"><a href="#拖着个crashpad程序" class="headerlink" title="拖着个crashpad程序"></a>拖着个crashpad程序</h2><p>编译出来发现还需要带着crashpad_handler一起发布才能抓minidump</p>
+<p>虽然也可以在程序里初始化sentry之前把crashpad释放到临时目录之类的</p>
+<p>但是实在太不优雅了 (摔</p>
+<p>使用 <code>SENTRY_BACKEND=breakpad</code> , 优雅又干净</p>
+<blockquote>
+<p>注: 进程内异常捕获有健壮性问题, 但….<strong>又不是不能用.jpg</strong></p>
+</blockquote>
+<blockquote>
+<p>crashpad转码白整了 (悲</p>
+</blockquote>
+<h2 id="内嵌sentry到程序内"><a href="#内嵌sentry到程序内" class="headerlink" title="内嵌sentry到程序内"></a>内嵌sentry到程序内</h2><p>设置 <code>SENTRY_BUILD_SHARED_LIBS=NO</code> 编译静态库而不是dll</p>
+<p>使用时需要在导入header之前做额外工作</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SENTRY_BUILD_STATIC 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sentry.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>太不优雅, 修改sentry.h把这个define放到文件头去</p>
+<h2 id="最终命令行"><a href="#最终命令行" class="headerlink" title="最终命令行"></a>最终命令行</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">set CMAKE_PREFIX_PATH=E:/Applications/Qt/static-5.12/lib/cmake/Qt5</span><br><span class="line"></span><br><span class="line">cmake -B build ^</span><br><span class="line">-D SENTRY_BACKEND=breakpad ^</span><br><span class="line">-D SENTRY_BUILD_EXAMPLES=NO ^</span><br><span class="line">-D SENTRY_BUILD_SHARED_LIBS=NO ^</span><br><span class="line">-D SENTRY_BUILD_TESTS=NO ^</span><br><span class="line">-D SENTRY_INTEGRATION_QT=YES ^</span><br><span class="line">-S .</span><br><span class="line"></span><br><span class="line">cmake --build build --config Release --parallel</span><br></pre></td></tr></table></figure>
+
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-04-06</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Windows/" title="Windows">Windows </a><a class="tag" href="/tags/C/" title="C++">C++ </a><a class="tag" href="/tags/Qt/" title="Qt">Qt </a><a class="tag" href="/tags/Sentry/" title="Sentry">Sentry </a><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span class="visitors_counter"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/01/30/Android-%E5%AE%9E%E7%8E%B0%E6%AF%8F%E5%A4%A9%E6%97%A9%E4%B8%8A%E5%85%B3%E9%97%AD%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81-%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E5%9B%BE%E6%A1%88%E6%88%96%E5%AF%86%E7%A0%81/" title="Android 实现每天早上关闭指纹解锁 强制使用图案或密码">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><a id="comments"></a><div id="gitalk-container" style="margin: 0 30px 30px 30px;"></div><script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css"><script src="/js/md5.min.js"></script><script>const gitalk = new Gitalk({
+  clientID: '6704fe160be4c8144896',
+  clientSecret: 'f05e0417ce056a591b3cf3cd628143f3f00bb9d2',
+  repo: 'sakurakooi-blogs',      // The repository of store comments,
+  owner: 'ArukasSiteHosting',
+  admin: ['SakuraKoi'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script>var OriginTitile=document.title,st;
+document.addEventListener("visibilitychange",function(){
+    document.hidden ? 
+        (document.title="诶!? 不许跑喵~",clearTimeout(st)) : 
+        (document.title=OriginTitile, st=setTimeout(function(){
+            document.title=OriginTitile;
+        },3e3))
+    }
+);</script><script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script><script>particlesJS("particles", {
+    "particles": {
+      "number": {
+        "value": 95,
+        "density": {
+          "enable": true,
+          "value_area": 2446.3576890600452
+        }
+      },
+      "color": {
+        "value": "#bbbbbb"
+      },
+      "shape": {
+        "type": "polygon",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 6
+        },
+        "image": {
+          "src": "img/github.svg",
+          "width": 100,
+          "height": 100
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": false,
+        "anim": {
+          "enable": false,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 1.5,
+        "random": true,
+        "anim": {
+          "enable": false,
+          "speed": 40,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#bbbbbb",
+        "opacity": 0.6,
+        "width": 1.5
+      },
+      "move": {
+        "enable": true,
+        "speed": 2,
+        "direction": "none",
+        "random": false,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": false,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
+      }
+    },
+    "interactivity": {
+      "detect_on": "window",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "bubble"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "repulse"
+        },
+        "resize": true
+      },
+      "modes": {
+        "grab": {
+          "distance": 400,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 2,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 147.597845071462,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
+      }
+    },
+    "retina_detect": true
+  });</script></body></html>

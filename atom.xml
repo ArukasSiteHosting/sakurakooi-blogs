@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog,sakurakooi,cyou/"/>
-  <updated>2022-01-31T04:40:03.205Z</updated>
+  <updated>2022-04-06T05:33:52.255Z</updated>
   <id>https://blog,sakurakooi,cyou/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>记Windows编译sentry-native集成Qt</title>
+    <link href="https://blog,sakurakooi,cyou/2022/04/06/%E8%AE%B0Windows%E7%BC%96%E8%AF%91sentry-native%E9%9B%86%E6%88%90qt/"/>
+    <id>https://blog,sakurakooi,cyou/2022/04/06/记Windows编译sentry-native集成qt/</id>
+    <published>2022-04-06T05:33:31.000Z</published>
+    <updated>2022-04-06T05:33:52.255Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="官方文档-https-docs-sentry-io-platforms-native-guides-qt"><a href="#官方文档-https-docs-sentry-io-platforms-native-guides-qt" class="headerlink" title="官方文档: https://docs.sentry.io/platforms/native/guides/qt/"></a>官方文档: <a href="https://docs.sentry.io/platforms/native/guides/qt/">https://docs.sentry.io/platforms/native/guides/qt/</a></h3><blockquote><p>一篇笔记, 也是备忘</p></blockquote><h2 id="crashpad编码的坑"><a href="#crashpad编码的坑" class="headerlink" title="crashpad编码的坑"></a>crashpad编码的坑</h2><p>crashpad的源代码全是UTF-8 without BOM</p><p>编译的时候一串的 <code>C4819 该文件包含不能在当前代码页中表示的字符</code> 满屏飘红</p><p>咱这里有cygwin的zsh环境所以简单粗暴批量加BOM</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># for zsh</span></span><br><span class="line"><span class="built_in">setopt</span> no_nomatch</span><br><span class="line"><span class="built_in">setopt</span> nullglob</span><br><span class="line"><span class="comment"># for bash</span></span><br><span class="line"><span class="built_in">shopt</span> -s nullglob</span><br><span class="line"></span><br><span class="line"><span class="comment"># the real job</span></span><br><span class="line"><span class="keyword">for</span> f <span class="keyword">in</span> *.&#123;h,cc,c,cpp&#125;; <span class="keyword">do</span> sed -i <span class="string">&#x27;1s/^\(\xef\xbb\xbf\)\?/\xef\xbb\xbf/&#x27;</span> <span class="variable">$f</span>; <span class="keyword">done</span></span><br></pre></td></tr></table></figure><h2 id="Qt目录识别"><a href="#Qt目录识别" class="headerlink" title="Qt目录识别"></a>Qt目录识别</h2><p>设置SENTRY_INTEGRATION_QT=YES后手动在CMAKE_PREFIX_PATH添加qt的目录</p><p>官方文档说的是安装目录</p><p>但实际上需要设置为<code>where/qt/installed/at/lib/cmake/Qt5</code>才能正确识别</p><h2 id="拖着个crashpad程序"><a href="#拖着个crashpad程序" class="headerlink" title="拖着个crashpad程序"></a>拖着个crashpad程序</h2><p>编译出来发现还需要带着crashpad_handler一起发布才能抓minidump</p><p>虽然也可以在程序里初始化sentry之前把crashpad释放到临时目录之类的</p><p>但是实在太不优雅了 (摔</p><p>使用 <code>SENTRY_BACKEND=breakpad</code> , 优雅又干净</p><blockquote><p>注: 进程内异常捕获有健壮性问题, 但….<strong>又不是不能用.jpg</strong></p></blockquote><blockquote><p>crashpad转码白整了 (悲</p></blockquote><h2 id="内嵌sentry到程序内"><a href="#内嵌sentry到程序内" class="headerlink" title="内嵌sentry到程序内"></a>内嵌sentry到程序内</h2><p>设置 <code>SENTRY_BUILD_SHARED_LIBS=NO</code> 编译静态库而不是dll</p><p>使用时需要在导入header之前做额外工作</p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SENTRY_BUILD_STATIC 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sentry.h&gt;</span></span></span><br></pre></td></tr></table></figure><p>太不优雅, 修改sentry.h把这个define放到文件头去</p><h2 id="最终命令行"><a href="#最终命令行" class="headerlink" title="最终命令行"></a>最终命令行</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">set CMAKE_PREFIX_PATH=E:/Applications/Qt/static-5.12/lib/cmake/Qt5</span><br><span class="line"></span><br><span class="line">cmake -B build ^</span><br><span class="line">-D SENTRY_BACKEND=breakpad ^</span><br><span class="line">-D SENTRY_BUILD_EXAMPLES=NO ^</span><br><span class="line">-D SENTRY_BUILD_SHARED_LIBS=NO ^</span><br><span class="line">-D SENTRY_BUILD_TESTS=NO ^</span><br><span class="line">-D SENTRY_INTEGRATION_QT=YES ^</span><br><span class="line">-S .</span><br><span class="line"></span><br><span class="line">cmake --build build --config Release --parallel</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+      
+    
+    </summary>
+    
+    
+      <category term="Windows" scheme="https://blog,sakurakooi,cyou/tags/Windows/"/>
+    
+      <category term="C++" scheme="https://blog,sakurakooi,cyou/tags/C/"/>
+    
+      <category term="Qt" scheme="https://blog,sakurakooi,cyou/tags/Qt/"/>
+    
+      <category term="Sentry" scheme="https://blog,sakurakooi,cyou/tags/Sentry/"/>
+    
+  </entry>
   
   <entry>
     <title>Android 实现每天早上关闭指纹解锁 强制使用图案或密码</title>
