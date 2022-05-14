@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog,sakurakooi,cyou/"/>
-  <updated>2022-04-06T05:33:52.255Z</updated>
+  <updated>2022-05-14T09:21:43.510Z</updated>
   <id>https://blog,sakurakooi,cyou/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>记Spring使用yml配置文件时连接数据库的一个坑</title>
+    <link href="https://blog,sakurakooi,cyou/2022/05/14/%E8%AE%B0Spring%E4%BD%BF%E7%94%A8yml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%97%B6%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
+    <id>https://blog,sakurakooi,cyou/2022/05/14/记Spring使用yml配置文件时连接数据库的一个坑/</id>
+    <published>2022-05-14T09:18:46.000Z</published>
+    <updated>2022-05-14T09:21:43.510Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">password:</span> <span class="number">0123456</span></span><br></pre></td></tr></table></figure><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">password:</span> <span class="string">&#x27;0123456&#x27;</span></span><br></pre></td></tr></table></figure><p>前者会被当作整数处理, 连接时实际上使用的是123456作为密码, 然后就炸了</p><p>debug了半天才发现怎么回事, 记一下, 备忘</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+      
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="https://blog,sakurakooi,cyou/tags/Java/"/>
+    
+      <category term="SpringBoot" scheme="https://blog,sakurakooi,cyou/tags/SpringBoot/"/>
+    
+      <category term="Mysql" scheme="https://blog,sakurakooi,cyou/tags/Mysql/"/>
+    
+  </entry>
   
   <entry>
     <title>记Windows编译sentry-native集成Qt</title>
