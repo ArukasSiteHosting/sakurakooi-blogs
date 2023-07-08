@@ -5,9 +5,9 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="https://blog,sakurakooi,cyou/"/>
-  <updated>2022-11-14T15:11:13.404Z</updated>
-  <id>https://blog,sakurakooi,cyou/</id>
+  <link href="https://blog,sakurakooi,dev/"/>
+  <updated>2023-06-23T13:55:47.345Z</updated>
+  <id>https://blog,sakurakooi,dev/</id>
   
   <author>
     <name>SakuraKooi</name>
@@ -17,9 +17,32 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>源码编译GNU Screen笔记</title>
+    <link href="https://blog,sakurakooi,dev/2023/06/20/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91GNU-Screen%E7%AC%94%E8%AE%B0/"/>
+    <id>https://blog,sakurakooi,dev/2023/06/20/源码编译GNU-Screen笔记/</id>
+    <published>2023-06-20T06:10:59.000Z</published>
+    <updated>2023-06-23T13:55:47.345Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>Centos EPEL仓库里的screen版本太老了, 连RGB都不支持<br>缺少信仰! (摔</p><h3 id="编译过程"><a href="#编译过程" class="headerlink" title="编译过程"></a>编译过程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget http://git.savannah.gnu.org/cgit/screen.git/snapshot/screen-master.tar.gz</span><br><span class="line">tar zxf screen-master.tar.gz</span><br><span class="line">cd screen-master</span><br><span class="line">cd src</span><br><span class="line">./autogen.sh</span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure><h3 id="configure错误处理"><a href="#configure错误处理" class="headerlink" title="configure错误处理"></a>configure错误处理</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">configure: error: unable to find tgetent() function</span><br></pre></td></tr></table></figure><p>缺少依赖 <code>ncurses-devel</code></p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">checking for PAM support... configure: error: no</span><br><span class="line">翻了一下config.log, 得到如下错误</span><br><span class="line">security/pam_appl.h: No such file or directory</span><br></pre></td></tr></table></figure><p>缺少依赖 <code>pam-devel</code></p><h3 id="Screen-4-99-强制密码策略的坑"><a href="#Screen-4-99-强制密码策略的坑" class="headerlink" title="Screen 4.99+ 强制密码策略的坑"></a>Screen 4.99+ 强制密码策略的坑</h3><p>make install完, 测试了一下RGB, 完美!w<br>但是… Ctrl A+D完事 <code>screen -r</code><br>一个大大的 <code>Password: </code> 弹了出来, 咱傻了.jpg<br>咱<code>.screenrc</code>里并没有配置密码(呆</p><p>翻了一下新版screen使用PAM进行身份验证, 并且强制验证密码<br>输入linux账户密码直接 <code>Password incorrect.</code>, 咱又傻了.jpg</p><p>编辑 <code>vi /etc/pam.d/screen</code> , 嗯, 文件不存在, 问题原因找到(<br>糊进去一个 <code>auth required pam_unix.so</code> , <code>screen -r</code>, 成功w<br>当然, 每次都输入一遍密码仍然很麻烦…. so….</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">auth required pam_permit.so</span><br></pre></td></tr></table></figure><p>虽然仍然会弹个 <code>Password: </code> 但只需要直接回车就好了w</p><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+      
+    
+    </summary>
+    
+    
+      <category term="Linux" scheme="https://blog,sakurakooi,dev/tags/Linux/"/>
+    
+  </entry>
+  
+  <entry>
     <title>C++ 强制启用 Windows 10 暗色标题栏</title>
-    <link href="https://blog,sakurakooi,cyou/2022/10/28/C++%E5%BC%BA%E5%88%B6%E5%90%AF%E7%94%A8Win10%E6%9A%97%E8%89%B2%E6%A0%87%E9%A2%98%E6%A0%8F/"/>
-    <id>https://blog,sakurakooi,cyou/2022/10/28/C++强制启用Win10暗色标题栏/</id>
+    <link href="https://blog,sakurakooi,dev/2022/10/28/C++%E5%BC%BA%E5%88%B6%E5%90%AF%E7%94%A8Win10%E6%9A%97%E8%89%B2%E6%A0%87%E9%A2%98%E6%A0%8F/"/>
+    <id>https://blog,sakurakooi,dev/2022/10/28/C++强制启用Win10暗色标题栏/</id>
     <published>2022-10-28T12:37:11.000Z</published>
     <updated>2022-11-14T15:11:13.404Z</updated>
     
@@ -35,18 +58,18 @@
     </summary>
     
     
-      <category term="Windows" scheme="https://blog,sakurakooi,cyou/tags/Windows/"/>
+      <category term="Windows" scheme="https://blog,sakurakooi,dev/tags/Windows/"/>
     
-      <category term="C++" scheme="https://blog,sakurakooi,cyou/tags/C/"/>
+      <category term="C++" scheme="https://blog,sakurakooi,dev/tags/C/"/>
     
-      <category term="暗色模式" scheme="https://blog,sakurakooi,cyou/tags/%E6%9A%97%E8%89%B2%E6%A8%A1%E5%BC%8F/"/>
+      <category term="暗色模式" scheme="https://blog,sakurakooi,dev/tags/%E6%9A%97%E8%89%B2%E6%A8%A1%E5%BC%8F/"/>
     
   </entry>
   
   <entry>
     <title>记Spring使用yml配置文件时连接数据库的一个坑</title>
-    <link href="https://blog,sakurakooi,cyou/2022/05/14/%E8%AE%B0Spring%E4%BD%BF%E7%94%A8yml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%97%B6%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
-    <id>https://blog,sakurakooi,cyou/2022/05/14/记Spring使用yml配置文件时连接数据库的一个坑/</id>
+    <link href="https://blog,sakurakooi,dev/2022/05/14/%E8%AE%B0Spring%E4%BD%BF%E7%94%A8yml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%97%B6%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
+    <id>https://blog,sakurakooi,dev/2022/05/14/记Spring使用yml配置文件时连接数据库的一个坑/</id>
     <published>2022-05-14T09:18:46.000Z</published>
     <updated>2022-05-14T09:21:43.510Z</updated>
     
@@ -62,18 +85,18 @@
     </summary>
     
     
-      <category term="Java" scheme="https://blog,sakurakooi,cyou/tags/Java/"/>
+      <category term="Java" scheme="https://blog,sakurakooi,dev/tags/Java/"/>
     
-      <category term="SpringBoot" scheme="https://blog,sakurakooi,cyou/tags/SpringBoot/"/>
+      <category term="SpringBoot" scheme="https://blog,sakurakooi,dev/tags/SpringBoot/"/>
     
-      <category term="Mysql" scheme="https://blog,sakurakooi,cyou/tags/Mysql/"/>
+      <category term="Mysql" scheme="https://blog,sakurakooi,dev/tags/Mysql/"/>
     
   </entry>
   
   <entry>
     <title>记Windows编译sentry-native集成Qt</title>
-    <link href="https://blog,sakurakooi,cyou/2022/04/06/%E8%AE%B0Windows%E7%BC%96%E8%AF%91sentry-native%E9%9B%86%E6%88%90qt/"/>
-    <id>https://blog,sakurakooi,cyou/2022/04/06/记Windows编译sentry-native集成qt/</id>
+    <link href="https://blog,sakurakooi,dev/2022/04/06/%E8%AE%B0Windows%E7%BC%96%E8%AF%91sentry-native%E9%9B%86%E6%88%90qt/"/>
+    <id>https://blog,sakurakooi,dev/2022/04/06/记Windows编译sentry-native集成qt/</id>
     <published>2022-04-06T05:33:31.000Z</published>
     <updated>2022-04-06T05:33:52.255Z</updated>
     
@@ -89,20 +112,20 @@
     </summary>
     
     
-      <category term="Windows" scheme="https://blog,sakurakooi,cyou/tags/Windows/"/>
+      <category term="Windows" scheme="https://blog,sakurakooi,dev/tags/Windows/"/>
     
-      <category term="C++" scheme="https://blog,sakurakooi,cyou/tags/C/"/>
+      <category term="C++" scheme="https://blog,sakurakooi,dev/tags/C/"/>
     
-      <category term="Qt" scheme="https://blog,sakurakooi,cyou/tags/Qt/"/>
+      <category term="Qt" scheme="https://blog,sakurakooi,dev/tags/Qt/"/>
     
-      <category term="Sentry" scheme="https://blog,sakurakooi,cyou/tags/Sentry/"/>
+      <category term="Sentry" scheme="https://blog,sakurakooi,dev/tags/Sentry/"/>
     
   </entry>
   
   <entry>
     <title>Android 实现每天早上关闭指纹解锁 强制使用图案或密码</title>
-    <link href="https://blog,sakurakooi,cyou/2022/01/30/Android-%E5%AE%9E%E7%8E%B0%E6%AF%8F%E5%A4%A9%E6%97%A9%E4%B8%8A%E5%85%B3%E9%97%AD%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81-%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E5%9B%BE%E6%A1%88%E6%88%96%E5%AF%86%E7%A0%81/"/>
-    <id>https://blog,sakurakooi,cyou/2022/01/30/Android-实现每天早上关闭指纹解锁-强制使用图案或密码/</id>
+    <link href="https://blog,sakurakooi,dev/2022/01/30/Android-%E5%AE%9E%E7%8E%B0%E6%AF%8F%E5%A4%A9%E6%97%A9%E4%B8%8A%E5%85%B3%E9%97%AD%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81-%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E5%9B%BE%E6%A1%88%E6%88%96%E5%AF%86%E7%A0%81/"/>
+    <id>https://blog,sakurakooi,dev/2022/01/30/Android-实现每天早上关闭指纹解锁-强制使用图案或密码/</id>
     <published>2022-01-30T00:52:09.000Z</published>
     <updated>2022-01-31T04:40:03.205Z</updated>
     
@@ -118,16 +141,16 @@
     </summary>
     
     
-      <category term="Android" scheme="https://blog,sakurakooi,cyou/tags/Android/"/>
+      <category term="Android" scheme="https://blog,sakurakooi,dev/tags/Android/"/>
     
-      <category term="隐私" scheme="https://blog,sakurakooi,cyou/tags/%E9%9A%90%E7%A7%81/"/>
+      <category term="隐私" scheme="https://blog,sakurakooi,dev/tags/%E9%9A%90%E7%A7%81/"/>
     
   </entry>
   
   <entry>
     <title>Hello World</title>
-    <link href="https://blog,sakurakooi,cyou/2022/01/03/hello-world/"/>
-    <id>https://blog,sakurakooi,cyou/2022/01/03/hello-world/</id>
+    <link href="https://blog,sakurakooi,dev/2022/01/03/hello-world/"/>
+    <id>https://blog,sakurakooi,dev/2022/01/03/hello-world/</id>
     <published>2022-01-03T08:14:17.852Z</published>
     <updated>2022-01-16T11:27:40.548Z</updated>
     
