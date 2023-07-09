@@ -4,8 +4,8 @@ html {
   -webkit-font-smoothing: antialiased; }
 
 body {
-  color: rgba(0, 0, 0, 0.5);
-  font-family: 'PingHei', 'PingFang SC', Helvetica Neue, 'Work Sans', 'Hiragino Sans GB', 'Microsoft YaHei', SimSun, sans-serif;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: "LXGW WenKai Screen", "PingHei", "PingFang SC", Helvetica Neue, "Work Sans", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
   font-size: 15px;
   width: 100%;
   margin: 0 auto 30px auto;
@@ -14,22 +14,24 @@ body {
 p {
   line-height: 1.9em;
   font-weight: 400;
-  font-size: 14px; }
+  font-size: 14.5px; }
 
 a {
   text-decoration: none; }
 
-a:link, a:visited {
+a:link,
+a:visited {
   opacity: 1;
-  -webkit-transition: all .15s linear;
-  -moz-transition: all .15s linear;
-  -o-transition: all .15s linear;
-  -ms-transition: all .15s linear;
-  transition: all .15s linear;
+  -webkit-transition: all 0.15s linear;
+  -moz-transition: all 0.15s linear;
+  -o-transition: all 0.15s linear;
+  -ms-transition: all 0.15s linear;
+  transition: all 0.15s linear;
   color: #424242; }
 
-a:hover, a:active {
-  color: #4786D6; }
+a:hover,
+a:active {
+  color: #4786d6; }
 
 /*basic styles ends*/
 /*animation starts*/
@@ -109,19 +111,19 @@ a:hover, a:active {
     list-style: none;
     padding: 18px 30px;
     float: left;
-    font-size: 12px; }
+    font-size: 15px; }
     .page-top .nav li {
       position: relative;
       display: initial;
       padding-right: 20px; }
     .page-top .nav a {
-      color: #5A5A5A; }
+      color: #5a5a5a; }
     .page-top .nav a:hover {
-      color: #4786D6; }
+      color: #4786d6; }
     .page-top .nav a.current {
-      color: #5A5A5A;
+      color: #5a5a5a;
       padding-bottom: 22px;
-      border-bottom: 1px solid #5A5A5A; }
+      border-bottom: 1px solid #5a5a5a; }
   .page-top .information {
     float: right;
     padding-top: 12px;
@@ -146,7 +148,6 @@ a:hover, a:active {
   background-size: cover;
   background-color: #eeea;
   height: 100%;
-  transition: 0.8s;
   top: 0;
   left: 0;
   position: fixed;
@@ -185,10 +186,10 @@ a:hover, a:active {
     .sidebar .social-links a {
       color: #565654; }
     .sidebar .social-links a:hover {
-      color: #4786D6; }
+      color: #4786d6; }
 
 .post {
-  background-color: #FFFa;
+  background-color: #fffa;
   padding: 1em;
   margin: 30px; }
   .post .post-title h1 {
@@ -220,15 +221,15 @@ a:hover, a:active {
   .post .post-content a {
     text-decoration: none;
     letter-spacing: 1px;
-    color: #4786D6; }
+    color: #4786d6; }
   .post .post-content a:hover {
-    color: #2F69B3; }
+    color: #2f69b3; }
   .post .post-content h3 {
-    color: #5F5F5F;
+    color: #5f5f5f;
     font-size: 22px;
     font-weight: 600; }
   .post .post-content h4 {
-    color: #5F5F5F;
+    color: #5f5f5f;
     font-size: 16px; }
   .post .post-footer {
     padding: 0 0 16px 0;
@@ -239,7 +240,7 @@ a:hover, a:active {
       color: #bbbbbb; }
       .post .post-footer .meta .info {
         float: left;
-        font-size: 12px; }
+        font-size: 12.5px; }
         .post .post-footer .meta .info .date {
           margin-right: 10px; }
       .post .post-footer .meta a {
@@ -247,7 +248,7 @@ a:hover, a:active {
         color: #bbbbbb;
         padding-right: 10px; }
         .post .post-footer .meta a:hover {
-          color: #4786D6; }
+          color: #4786d6; }
       .post .post-footer .meta i {
         margin-right: 6px; }
     .post .post-footer .tags {
@@ -313,23 +314,26 @@ a:hover, a:active {
 .footer {
   clear: both;
   text-align: center;
-  font-size: 10px;
+  font-size: 12.5px;
   margin: 0 auto;
   bottom: 0;
   position: absolute;
   width: 100%;
   padding-bottom: 20px; }
   .footer a {
-    color: #A6A6A6; }
+    color: #a6a6a6; }
   .footer a:hover {
-    color: #4786D6; }
+    color: #4786d6; }
+
+.footer-mobile > .footer {
+  display: none; }
 
 /*for archive*/
 .archive {
   width: 100%; }
 
 .list-with-title {
-  font-size: 14px;
+  font-size: 14.5px;
   margin: 30px;
   padding: 0; }
   .list-with-title li {
@@ -346,11 +350,11 @@ a:hover, a:active {
       padding-bottom: 5px; }
       .list-with-title .listing .listing-post .post-time {
         float: right;
-        color: #C5C5C5; }
+        color: #c5c5c5; }
       .list-with-title .listing .listing-post a {
-        color: #8F8F8F; }
+        color: #8f8f8f; }
         .list-with-title .listing .listing-post a:hover {
-          color: #4786D6; }
+          color: #4786d6; }
 
 /* share */
 .share {
@@ -361,39 +365,39 @@ a:hover, a:active {
   width: 32px;
   height: 32px;
   border-radius: 300px;
-  background-color: #3E3E3E;
+  background-color: #3e3e3e;
   margin-right: 5px; }
   .evernote a {
     color: #fff;
     padding: 11px;
     font-size: 12px; }
   .evernote a:hover {
-    color: #ED6243;
+    color: #ed6243;
     padding: 11px; }
 
 .weibo {
   width: 32px;
   height: 32px;
   border-radius: 300px;
-  background-color: #ED6243;
+  background-color: #ed6243;
   margin-right: 5px; }
   .weibo a {
     color: #fff;
     padding: 9px; }
   .weibo a:hover {
-    color: #BD4226; }
+    color: #bd4226; }
 
 .twitter {
   width: 32px;
   height: 32px;
   border-radius: 300px;
-  background-color: #59C0FD;
+  background-color: #59c0fd;
   margin-right: 5px; }
   .twitter a {
     color: #fff;
     padding: 9px; }
   .twitter a:hover {
-    color: #4B9ECE; }
+    color: #4b9ece; }
 
 /* about */
 .about {
@@ -512,7 +516,7 @@ a.btn {
           padding: 0.5em 1.25em;
           outline: 0;
           color: #fff;
-          background: #3CBD10;
+          background: #3cbd10;
           font-size: 14px;
           text-align: center;
           text-decoration: none;
@@ -558,6 +562,9 @@ a.btn {
     position: absolute; }
   .footer {
     display: none; }
+  .footer-mobile > .footer {
+    display: block;
+    position: relative; }
   .share {
     display: grid; } }
 
@@ -568,26 +575,26 @@ a.btn {
   display: none !important; }
 
 .gt-container .gt-link {
-  border-bottom: 1px dotted #5F5F5F !important; }
+  border-bottom: 1px dotted #5f5f5f !important; }
 
 .gt-container .gt-header-controls-tip {
-  color: #5F5F5F !important; }
+  color: #5f5f5f !important; }
 
 .gt-container .gt-btn-preview {
-  color: #5F5F5F !important; }
+  color: #5f5f5f !important; }
 
 .gt-container .gt-btn {
-  border: 1px solid #5F5F5F !important;
-  background-color: #5F5F5F !important; }
+  border: 1px solid #5f5f5f !important;
+  background-color: #5f5f5f !important; }
 
 .gt-container a {
-  color: #5F5F5F !important; }
+  color: #5f5f5f !important; }
 
 .gt-container .gt-comment-username {
-  color: #5F5F5F !important; }
+  color: #5f5f5f !important; }
 
 .gt-container .gt-svg svg {
-  fill: #5F5F5F !important; }
+  fill: #5f5f5f !important; }
 
 .gt-container .gt-btn-preview {
   background-color: #fff !important; }
@@ -608,10 +615,18 @@ a.btn {
   z-index: -1; }
 
 .spoiler .spoiler-title:before {
-  content: "" !important; }
+  content: "\f054" !important;
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: rotate 0.5s;
+  margin-right: 0.3em; }
 
 .spoiler.expanded .spoiler-title:before {
-  content: "折叠 " !important; }
+  rotate: 90deg; }
 
 .spoiler {
   border-radius: unset !important; }
@@ -621,20 +636,27 @@ a.btn {
 
 .links-content {
   display: flex;
-  flex-direction: column; }
-
-.links-content .card:first-child {
-  margin-top: 1.5em;
-  margin-bottom: .5em; }
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 1em; }
 
 .links-content .card {
   display: flex;
   padding: 0.75em;
-  margin-top: 0em;
-  margin-bottom: .5em;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  margin-right: 0.5em;
   transition-duration: 0.15s;
   background-color: #eee5;
-  align-items: center; }
+  align-items: center;
+  width: calc(50% - 2em); }
+
+.links-content .card:nth-child(even) {
+  margin-right: 0;
+  width: calc(50% - 1.5em); }
+
+.links-content .card:last-child {
+  width: 100%; }
 
 .links-content .card:hover {
   box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04);
@@ -643,7 +665,7 @@ a.btn {
 .links-content .card .icon {
   width: 3.5em;
   height: 3.5em;
-  margin-right: .75em;
-  margin-left: .1em;
+  margin-right: 0.75em;
+  margin-left: 0.1em;
   filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
   border-radius: 50%; }
