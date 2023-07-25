@@ -566,7 +566,12 @@ a.btn {
     display: block;
     position: relative; }
   .share {
-    display: grid; } }
+    display: grid; }
+  .links-content .card {
+    margin-right: 0 !important;
+    width: 100% !important; }
+  .links-content .card:nth-child(even) {
+    width: 100% !important; } }
 
 .vempty {
   display: none !important; }
