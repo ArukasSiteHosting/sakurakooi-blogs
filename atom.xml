@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog,sakurakooi,dev/"/>
-  <updated>2023-08-23T15:00:21.871Z</updated>
+  <updated>2023-11-18T13:16:55.414Z</updated>
   <id>https://blog,sakurakooi,dev/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>去除某IDEA插件的反破解检测</title>
+    <link href="https://blog,sakurakooi,dev/2023/11/18/%E5%8E%BB%E9%99%A4%E6%9F%90IDEA%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8F%8D%E7%A0%B4%E8%A7%A3%E6%A3%80%E6%B5%8B%E6%9C%BA%E5%88%B6/"/>
+    <id>https://blog,sakurakooi,dev/2023/11/18/去除某IDEA插件的反破解检测机制/</id>
+    <published>2023-11-18T11:35:35.000Z</published>
+    <updated>2023-11-18T13:16:55.414Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><blockquote><p><strong>免责声明</strong></p><p>本文撰写目的为分享技术, 仅供学习和研究目的, 不分享破解软件</p><p>如果喜欢某个软件, 请购买正版</p></blockquote><h3 id="起猛了"><a href="#起猛了" class="headerlink" title="起猛了"></a>起猛了</h3><p>一早起来摸代码, 发现IDEA右下角某插件弹了个盗版软件通知</p><p>代码先别摸了, 抄刀开整</p><h3 id="开整"><a href="#开整" class="headerlink" title="开整"></a>开整</h3><p>首先上 <code>%APPDATA%\JetBrains\IntelliJIdea2023.2\plugins</code> 里找到插件的本体jar</p><p>直接拖进jbm里, 随便点开几个class反编译看看</p><p><img src="https://s2.loli.net/2023/11/18/AUatHe9NJc7dSfK.png" alt="image-20231118195313164"></p><p>static块里被插入了大量的代码, 看代码结构, 特征非常鲜明的zelix混淆, 掏 <code>java-deobfuscator</code> 处理一下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zelix.StringEncryptionTransformer</span><br><span class="line">zelix.FlowObfuscationTransformer</span><br><span class="line">peephole.PeepholeOptimizer</span><br></pre></td></tr></table></figure><p>跑完重新拖进jbm里反编译就清晰多了, 直接搜索LDC <code>正版</code></p><p><img src="https://s2.loli.net/2023/11/18/vJyX86OUW7dxchG.png" alt="image-20231118195723485"></p><h4 id="第一个位置"><a href="#第一个位置" class="headerlink" title="第一个位置"></a>第一个位置</h4><p>第一个就是看见的提示框的文字了, 进去看一下代码</p><p><img src="https://s2.loli.net/2023/11/18/ELKh2PqZRwAdCMr.png" alt="image-20231118195839399"></p><p>简单的弹出通知, 搜索一下这个方法的引用</p><p><img src="https://s2.loli.net/2023/11/18/2qOehmCXMjL3BQP.png" alt="image-20231118195911070"></p><p>非常好作者, jump to declaration, 继续往里跟</p><p><img src="https://s2.loli.net/2023/11/18/QwJ2xb1OHmFENVL.png" alt="image-20231118195955239"></p><p>一个关键的检测方法, 反混淆后一目了然, 检测 <code>ja-netfilter</code> 破解的假授权</p><p>回到反混淆之前的jar干掉它, 定位到同样的method下, 在开头直接插入两行bytecode</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iconst_0</span><br><span class="line">ireturn</span><br></pre></td></tr></table></figure><p>直接 <code>return false</code> 处理掉</p><p><img src="https://s2.loli.net/2023/11/18/GisueDF4ymROtoc.png" alt="image-20231118200142949"></p><p><img src="https://s2.loli.net/2023/11/18/jrBUSOduAR57iX9.png" alt="image-20231118200405795"></p><p>切回反混淆后的jar, 对里面的每个方法调用逐个jump to declaration看看, 确认没有side effect</p><p>注意到这个 <code>b()</code> 里面还进行了一些private field的赋值, 并且这个class下面还有一个该field的public getter, 对这个getter查找所有引用, 同样确认没有side effect</p><p>非常好作者, 没有乱七八糟错综复杂的引用关系, 省的去做处理了</p><h4 id="第二个位置"><a href="#第二个位置" class="headerlink" title="第二个位置"></a>第二个位置</h4><p>之前搜索LDC的时候还有另一个, 同样jump过去看看</p><p><img src="https://s2.loli.net/2023/11/18/YG5Ru1asZfXFEOV.png" alt="image-20231118200631487"></p><p>调用的上面已经被解决掉了的那个方法, 因此其实不用管也可以</p><p>强迫症犯了, 一起清理掉吧, 对该方法搜索引用</p><p><img src="https://s2.loli.net/2023/11/18/Ie1Ta9vsP4AuhfS.png" alt="image-20231118200826972"></p><p>这玩意挺多调用的, 随便找一个看看</p><p><img src="https://s2.loli.net/2023/11/18/iumNTZKOVMUd34S.png" alt="image-20231118201311427"></p><p>其他也都是类似的东西</p><p>作者并不像他在插件提示里所说的那样”不影响插件使用”, 根据代码来看, 这里有一大堆让功能在使用时随机失效的暗桩</p><p>同样的方法处理一下, 这里需要return为true, 所以在方法开头插入bytecode</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iconst_1</span><br><span class="line">ireturn</span><br></pre></td></tr></table></figure><h4 id="第三个位置"><a href="#第三个位置" class="headerlink" title="第三个位置"></a>第三个位置</h4><p>class下面还有一些field b的getter和setter, 并且检测函数中通过对 <code>DomainObject.b()</code> 的if判断修改了该field</p><p>搜索一下引用, 分析这也疑似是一个暗桩</p><p>field <code>b</code> 的getter setter与 <code>DomainObject.b()</code> 在业务代码里错综复杂地互相交织, 通过null check在运行时不断切换里面的object内容, 猜测作用是防止第三方动态修改field来过检测? </p><p>反正是null check所以简单粗暴处理掉, getter开头插入bytecode</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">aconst_null</span><br><span class="line">areturn</span><br></pre></td></tr></table></figure><h4 id="第四个位置"><a href="#第四个位置" class="headerlink" title="第四个位置"></a>第四个位置</h4><p>还在同一package下找到了一个检查 <code>ja-netfilter</code> 的class</p><p>检测方法简单粗暴, 进行classloader隔离即可绕过该检测</p><p><img src="https://s2.loli.net/2023/11/18/LkKOQBNRJG6Vmoq.png" alt="image-20231118201733365"></p><h4 id="第五个位置"><a href="#第五个位置" class="headerlink" title="第五个位置"></a>第五个位置</h4><p>一个向作者的服务器发送HTTP请求校验证书的接口</p><p>还有一个检测到盗版后将硬件ID发送到作者服务器的HTTP接口</p><p>文章开头的检测被干掉之后, 已经没有方法调用这俩接口了, 直接不管w</p><h3 id="Done"><a href="#Done" class="headerlink" title="Done"></a>Done</h3><p>保存修改后的class, 替换回原jar里, 启动IDEA</p><p>搞定w</p><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+      
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="https://blog,sakurakooi,dev/tags/Java/"/>
+    
+      <category term="逆向" scheme="https://blog,sakurakooi,dev/tags/%E9%80%86%E5%90%91/"/>
+    
+      <category term="破解" scheme="https://blog,sakurakooi,dev/tags/%E7%A0%B4%E8%A7%A3/"/>
+    
+  </entry>
   
   <entry>
     <title>Xposed模块 资源注入</title>
