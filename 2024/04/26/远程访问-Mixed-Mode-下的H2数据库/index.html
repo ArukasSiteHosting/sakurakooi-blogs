@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="SakuraKooi"><title>远程访问 Mixed Mode 下的H2数据库 · SakuraKooi</title><meta name="description" content="H2支持通过在JDBC Url中添加 AUTO_SERVER=TRUE 参数使用Automatic Mixed Mode访问数据库
+在这种模式下
+
+第一个打开数据库的程序将通过文件方式访问数据库
+同时作为服务器, 启动一个daemon thread在随机端口号上启用TCP访问
+并将IP地址及端口号写"><meta name="keywords" content="SakuraKooi"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.6.0/style.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.5/400.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="particles"></div><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width: 127px; margin-bottom: 1em;filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.3)); border-radius: 50%;"><h3 title=""><a href="/">SakuraKooi</a></h3><div class="description"><p>梦是幽蓝色彩 灵魂如雪纯白</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/SakuraKoi"><i class="fa fa-github"></i></a></li><li><a href="mailto:me@sakurakooi.dev"><i class="fa fa-envelope"></i></a></li><li><a target="_blank" rel="noopener" href="https://twitter.com/SakuraKooi"><i class="fa fa-twitter"></i></a></li><li><a target="_blank" rel="noopener" href="https://steamcommunity.com/id/SakuraKooi"><i class="fa fa-steam">   </i></a></li><li><a target="_blank" rel="noopener" href="https://www.origin.com/hkg/en-us/search?searchString=SakuraKooi"><i class="fa fa-gamepad"></i></a></li></ul><div class="footer"><div class="p"> <span>© 2021 </span><i class="fa fa-star"></i><span> SakuraKooi</span></div><div class="by_farbox"><span>Powered by </span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo </a><span> & Theme modified from </span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core  </a></div><div class="beian"><img src="/images/moeicp.png" style="height:10px;margin-left: 10px;position: relative;top: 1px;"><a href="https://icp.gov.moe/?keyword=20224987" target="_blank" style="margin-left: 2px;">萌ICP备20224987号</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/guestbook">留言</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>远程访问 Mixed Mode 下的H2数据库</a></h3></div><div class="post-content"><p>H2支持通过在JDBC Url中添加 <code>AUTO_SERVER=TRUE</code> 参数使用Automatic Mixed Mode访问数据库</p>
+<p>在这种模式下</p>
+<ul>
+<li><p>第一个打开数据库的程序将通过文件方式访问数据库</p>
+<p>同时作为服务器, 启动一个daemon thread在随机端口号上启用TCP访问</p>
+<p>并将IP地址及端口号写入数据库的 <code>.lock.db</code> 文件中</p>
+</li>
+<li><p>后续访问此数据库的程序在发现 <code>.lock.db</code> 文件存在时</p>
+<p>将读取lock中的地址, 通过TCP方式连接到数据库</p>
+</li>
+<li><p>当第一个程序退出后, 仍在运行中的程序将决定出一个新的服务器, 供其他程序连接</p>
+</li>
+</ul>
+<p>此设计模式是为了同一主机上的多个程序共享数据库访问而设计的, 当需要通过网络访问时, 使用H2的Server mode仍然是更优的选择</p>
+<p>那如果一定要通过网络访问Mixed mode的数据库呢?</p>
+<ul>
+<li>修改JDBC Url, 带参数 <code>AUTO_SERVER_PORT=端口号</code> 连接数据库</li>
+<li>读取 <code>.lock.db</code> , 使用id字段的值作为 <code>serverKey</code></li>
+<li>使用 <code>jdbc:h2:tcp://&lt;address&gt;:&lt;port&gt;/&lt;serverKey&gt;</code> 连接数据库</li>
+</ul>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2024-04-26</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Java/" title="Java">Java </a><a class="tag" href="/tags/笔记/" title="笔记">笔记 </a><a class="tag" href="/tags/数据库/" title="数据库">数据库 </a><a class="tag" href="/tags/H2/" title="H2">H2 </a><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span class="visitors_counter"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2024/03/19/%E7%A0%B4%E8%A7%A3%E6%9F%90ERP%E7%B3%BB%E7%BB%9F%E4%B8%89%E6%96%B9API%E6%8E%A5%E5%8F%A3%E6%8E%88%E6%9D%83%E9%AA%8C%E8%AF%81/" title="破解某ERP系统三方API接口授权验证">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><a id="comments"></a><div id="gitalk-container" style="margin: 0 30px 30px 30px;"></div><script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css"><script src="/js/md5.min.js"></script><script>const gitalk = new Gitalk({
+  clientID: '6704fe160be4c8144896',
+  clientSecret: 'f05e0417ce056a591b3cf3cd628143f3f00bb9d2',
+  repo: 'sakurakooi-blogs',      // The repository of store comments,
+  owner: 'ArukasSiteHosting',
+  admin: ['SakuraKoi'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')</script><div class="footer-mobile"><div class="footer"><div class="p"> <span>© 2021 </span><i class="fa fa-star"></i><span> SakuraKooi</span></div><div class="by_farbox"><span>Powered by </span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo </a><span> & Theme modified from </span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core  </a></div><div class="beian"><img src="/images/moeicp.png" style="height:10px;margin-left: 10px;position: relative;top: 1px;"><a href="https://icp.gov.moe/?keyword=20224987" target="_blank" style="margin-left: 2px;">萌ICP备20224987号</a></div></div></div></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script>var OriginTitile=document.title,st;
+document.addEventListener("visibilitychange",function(){
+    document.hidden ? 
+        (document.title="诶!? 不许跑喵~",clearTimeout(st)) : 
+        (document.title=OriginTitile, st=setTimeout(function(){
+            document.title=OriginTitile;
+        },3e3))
+    }
+);</script><script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script><script>particlesJS("particles", {
+    "particles": {
+      "number": {
+        "value": 95,
+        "density": {
+          "enable": true,
+          "value_area": 2446.3576890600452
+        }
+      },
+      "color": {
+        "value": "#bbbbbb"
+      },
+      "shape": {
+        "type": "polygon",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 6
+        },
+        "image": {
+          "src": "img/github.svg",
+          "width": 100,
+          "height": 100
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": false,
+        "anim": {
+          "enable": false,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 1.5,
+        "random": true,
+        "anim": {
+          "enable": false,
+          "speed": 40,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#bbbbbb",
+        "opacity": 0.6,
+        "width": 1.5
+      },
+      "move": {
+        "enable": true,
+        "speed": 2,
+        "direction": "none",
+        "random": false,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": false,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
+      }
+    },
+    "interactivity": {
+      "detect_on": "window",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "bubble"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "repulse"
+        },
+        "resize": true
+      },
+      "modes": {
+        "grab": {
+          "distance": 400,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 2,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 147.597845071462,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
+      }
+    },
+    "retina_detect": true
+  });</script></body></html>

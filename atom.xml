@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.sakurakooi.dev/"/>
-  <updated>2024-04-26T11:48:10.085Z</updated>
+  <updated>2024-04-26T12:04:10.272Z</updated>
   <id>https://blog.sakurakooi.dev/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>远程访问 Mixed Mode 下的H2数据库</title>
+    <link href="https://blog.sakurakooi.dev/2024/04/26/%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE-Mixed-Mode-%E4%B8%8B%E7%9A%84H2%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    <id>https://blog.sakurakooi.dev/2024/04/26/远程访问-Mixed-Mode-下的H2数据库/</id>
+    <published>2024-04-26T06:34:25.000Z</published>
+    <updated>2024-04-26T12:04:10.272Z</updated>
+    
+    <content type="html"><![CDATA[<p>H2支持通过在JDBC Url中添加 <code>AUTO_SERVER=TRUE</code> 参数使用Automatic Mixed Mode访问数据库</p><p>在这种模式下</p><ul><li><p>第一个打开数据库的程序将通过文件方式访问数据库</p><p>同时作为服务器, 启动一个daemon thread在随机端口号上启用TCP访问</p><p>并将IP地址及端口号写入数据库的 <code>.lock.db</code> 文件中</p></li><li><p>后续访问此数据库的程序在发现 <code>.lock.db</code> 文件存在时</p><p>将读取lock中的地址, 通过TCP方式连接到数据库</p></li><li><p>当第一个程序退出后, 仍在运行中的程序将决定出一个新的服务器, 供其他程序连接</p></li></ul><p>此设计模式是为了同一主机上的多个程序共享数据库访问而设计的, 当需要通过网络访问时, 使用H2的Server mode仍然是更优的选择</p><p>那如果一定要通过网络访问Mixed mode的数据库呢?</p><ul><li>修改JDBC Url, 带参数 <code>AUTO_SERVER_PORT=端口号</code> 连接数据库</li><li>读取 <code>.lock.db</code> , 使用id字段的值作为 <code>serverKey</code></li><li>使用 <code>jdbc:h2:tcp://&lt;address&gt;:&lt;port&gt;/&lt;serverKey&gt;</code> 连接数据库</li></ul><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;H2支持通过在JDBC Url中添加 &lt;code&gt;AUTO_SERVER=TRUE&lt;/code&gt; 参数使用Automatic Mixed Mode访问数据库&lt;/p&gt;
+&lt;p&gt;在这种模式下&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;第一个打开数据库的程序将通过文件方式访问数据库&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="https://blog.sakurakooi.dev/tags/Java/"/>
+    
+      <category term="笔记" scheme="https://blog.sakurakooi.dev/tags/%E7%AC%94%E8%AE%B0/"/>
+    
+      <category term="数据库" scheme="https://blog.sakurakooi.dev/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+      <category term="H2" scheme="https://blog.sakurakooi.dev/tags/H2/"/>
+    
+  </entry>
   
   <entry>
     <title>破解某ERP系统三方API接口授权验证</title>
@@ -159,15 +192,15 @@
     <link href="https://blog.sakurakooi.dev/2022/05/14/%E8%AE%B0Spring%E4%BD%BF%E7%94%A8yml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%97%B6%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
     <id>https://blog.sakurakooi.dev/2022/05/14/记Spring使用yml配置文件时连接数据库的一个坑/</id>
     <published>2022-05-14T09:18:46.000Z</published>
-    <updated>2022-05-14T09:21:43.510Z</updated>
+    <updated>2024-04-26T11:54:40.608Z</updated>
     
-    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">password:</span> <span class="number">0123456</span></span><br></pre></td></tr></table></figure><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">password:</span> <span class="string">&#x27;0123456&#x27;</span></span><br></pre></td></tr></table></figure><p>前者会被当作整数处理, 连接时实际上使用的是123456作为密码, 然后就炸了</p><p>debug了半天才发现怎么回事, 记一下, 备忘</p>]]></content>
+    <content type="html"><![CDATA[<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">password:</span> <span class="number">0123456</span></span><br></pre></td></tr></table></figure><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">password:</span> <span class="string">&#x27;0123456&#x27;</span></span><br></pre></td></tr></table></figure><p>前者会被当作整数处理, 连接时实际上使用的是123456作为密码, 然后就炸了</p><p>debug了半天才发现怎么回事, 记一下, 备忘</p><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;\assets\css\APlayer.min.css&quot;&gt;&lt;script src=&quot;\assets\js\APlayer.min.js&quot; cla
+        &lt;figure class=&quot;highlight yaml&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span clas
       
     
     </summary>
@@ -178,6 +211,10 @@
       <category term="SpringBoot" scheme="https://blog.sakurakooi.dev/tags/SpringBoot/"/>
     
       <category term="Mysql" scheme="https://blog.sakurakooi.dev/tags/Mysql/"/>
+    
+      <category term="笔记" scheme="https://blog.sakurakooi.dev/tags/%E7%AC%94%E8%AE%B0/"/>
+    
+      <category term="数据库" scheme="https://blog.sakurakooi.dev/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
     
   </entry>
   
