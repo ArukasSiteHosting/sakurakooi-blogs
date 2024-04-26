@@ -1,0 +1,229 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="SakuraKooi"><title>破解某ERP系统三方API接口授权验证 · SakuraKooi</title><meta name="description" content="免责声明
+本文撰写目的为分享技术, 仅供学习和研究目的, 不分享破解软件
+如果喜欢某个软件, 请购买正版
+
+遇事不决Die (雾先把目标扔进 DetectItEasy 里查一下 看看什么成分
+
+.Net 4.0的DLL, ConfuserEx混淆
+Confuser作为一个经典开源混淆, 各种修改变种"><meta name="keywords" content="SakuraKooi"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.6.0/style.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.5/400.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="particles"></div><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width: 127px; margin-bottom: 1em;filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.3)); border-radius: 50%;"><h3 title=""><a href="/">SakuraKooi</a></h3><div class="description"><p>梦是幽蓝色彩 灵魂如雪纯白</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/SakuraKoi"><i class="fa fa-github"></i></a></li><li><a href="mailto:me@sakurakooi.dev"><i class="fa fa-envelope"></i></a></li><li><a target="_blank" rel="noopener" href="https://twitter.com/SakuraKooi"><i class="fa fa-twitter"></i></a></li><li><a target="_blank" rel="noopener" href="https://steamcommunity.com/id/SakuraKooi"><i class="fa fa-steam">   </i></a></li><li><a target="_blank" rel="noopener" href="https://www.origin.com/hkg/en-us/search?searchString=SakuraKooi"><i class="fa fa-gamepad"></i></a></li></ul><div class="footer"><div class="p"> <span>© 2021 </span><i class="fa fa-star"></i><span> SakuraKooi</span></div><div class="by_farbox"><span>Powered by </span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo </a><span> & Theme modified from </span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core  </a></div><div class="beian"><img src="/images/moeicp.png" style="height:10px;margin-left: 10px;position: relative;top: 1px;"><a href="https://icp.gov.moe/?keyword=20224987" target="_blank" style="margin-left: 2px;">萌ICP备20224987号</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/guestbook">留言</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>破解某ERP系统三方API接口授权验证</a></h3></div><div class="post-content"><blockquote>
+<p><strong>免责声明</strong></p>
+<p>本文撰写目的为分享技术, 仅供学习和研究目的, 不分享破解软件</p>
+<p>如果喜欢某个软件, 请购买正版</p>
+</blockquote>
+<h3 id="遇事不决Die-雾"><a href="#遇事不决Die-雾" class="headerlink" title="遇事不决Die (雾"></a>遇事不决Die (雾</h3><p>先把目标扔进 <code>DetectItEasy</code> 里查一下 <del>看看什么成分</del></p>
+<p><img src="https://s2.loli.net/2024/04/26/wkBDX19FA8aoUcL.png" alt="image-20240426191345880"></p>
+<p>.Net 4.0的DLL, ConfuserEx混淆</p>
+<p>Confuser作为一个经典开源混淆, 各种修改变种花里胡哨, 比较难找到能够完全通杀的反混淆工具</p>
+<p>首先拿去跑一遍UnconfuserEx清一清再拖进dotpeek里看, 根据api文档, 找到对应的controller看看反混淆效果怎么样</p>
+<p><img src="https://s2.loli.net/2024/04/26/2J5emTzSNrOskcu.png" alt="image-20240426191423502"></p>
+<p>似乎仍然有混淆没解开, 看看这几个StaticMethod</p>
+<h3 id="处理字符串加密"><a href="#处理字符串加密" class="headerlink" title="处理字符串加密"></a>处理字符串加密</h3><p><img src="https://s2.loli.net/2024/04/26/gteK1RGqzY2EVHP.png" alt="image-20240426191513893"></p>
+<p>一眼比较简单的字符串池类加密, 同时把 <code>int</code> 和 <code>byte[]</code> 也塞到池里一起混着存了, 根据参数传的key从池中取对应位置然后解密</p>
+<p>修改UnconfuserEx的源代码, 增加一个transformer来处理掉它</p>
+<p>大致处理流程如下</p>
+<ol>
+<li>使用 <code>Assembly.LoadFile</code> 加载目标DLL</li>
+<li>直接逐个扫描method body, 收集所有的key和对应的解密函数</li>
+<li>挨个 <code>Module.ResolveMethod</code> 然后 <code>MethodBase.Invoke</code> 拿到解密函数返回的结果</li>
+<li>将解密后的字符串替换回原位置</li>
+</ol>
+<p>虽然这样并不优雅, 但对各类算法变异通杀效果好, 至于安全性…拽进Windows Sandbox跑 (点头</p>
+<blockquote>
+<p>对这类字符串加密算法的改进可以考虑往上爬调用栈, 确保是来自于预期的地方的call</p>
+<p>或者干脆把采用调用来源的某些特征作为解密密钥, 可以有效防止咱这样的直接call解密</p>
+<p>当然…你跟踪调用栈…咱也可以模拟调用栈</p>
+<p>所以,  <del>有效, 但有那么一点点</del> </p>
+</blockquote>
+<p><img src="https://s2.loli.net/2024/04/26/jXqfxYI5Ni6O3m9.png" alt="image-20240426191820431"></p>
+<p>进行一个反混淆的跑, 将反混淆后的DLL再次反编译, 字符串已解密</p>
+<p>还有一大堆奇奇怪怪的StaticMethod, 现在来处理掉它们</p>
+<h3 id="处理-InvokeProxy-混淆"><a href="#处理-InvokeProxy-混淆" class="headerlink" title="处理 InvokeProxy 混淆"></a>处理 InvokeProxy 混淆</h3><p><img src="https://s2.loli.net/2024/04/26/zVFAgOQyX8EBotx.png" alt="image-20240426192037719"></p>
+<p>在反编译的代码中可以看到大量的这类函数及其调用, 特征鲜明的InvokeProxy类混淆</p>
+<p>此类混淆的目的是掩盖调用目标, 将一目了然的调用转换为乱七八糟不知道在call什么的调用, 干扰逆向者理解代码</p>
+<p><img src="https://s2.loli.net/2024/04/26/yMaWJpT6RKfxsjl.png" alt="image-20240426192235627"></p>
+<p>IL码可以看到较为明显的特征, 即 <code>使用ldarg将所有参数逐个压栈后执行实际操作, 再ret回去</code></p>
+<p>同样修改UnconfuserEx的源代码, 增加一个transformer对此类混淆进行处理</p>
+<p>大致反混淆流程如下:</p>
+<ol>
+<li>根据特征识别代理函数</li>
+<li>取出 <code>ldarg后的第一条指令</code>, 即执行的实际操作</li>
+<li>扫描所有method, 寻找call代理函数的位置</li>
+<li>把实际操作的指令替换回被代理的原位置</li>
+</ol>
+<blockquote>
+<p>至少来个乱序压栈再重新摆正吧 (碎碎念</p>
+</blockquote>
+<p><img src="https://s2.loli.net/2024/04/26/Zg2qacdEDlReBPI.png" alt="image-20240426192413635"></p>
+<p>再次进行一个反混淆的跑, 反编译可见代码逻辑已经很清晰了</p>
+<h3 id="开始分析"><a href="#开始分析" class="headerlink" title="开始分析"></a>开始分析</h3><p>首先跟踪到<code>Field4.GetMachineCode()</code>即<code>IAuthorizeHelper.GetMachineCode()</code></p>
+<p>查找Implementation定位到<code>AuthorizeHelper.GetMachineCode()</code></p>
+<p><img src="https://s2.loli.net/2024/04/26/lV4HiJGoEjAUgDC.png" alt="image-20240426192611845"></p>
+<p>CpuId加密, Encrypt是简单的des算法, 没什么看头, 对 <code>GetMachineCode</code> 查找引用</p>
+<p><img src="https://s2.loli.net/2024/04/26/FWCSUArXlvKiPd9.png" alt="image-20240426192641850"></p>
+<p>发现了似乎是判断激活的关键函数</p>
+<p><img src="https://s2.loli.net/2024/04/26/XG56LB7s2PjoChM.png" alt="image-20240426192651811"></p>
+<p>向下翻找变量 <code>machineCode</code> 的引用</p>
+<p><img src="https://s2.loli.net/2024/04/26/APrDRkNJEzp7U2y.png" alt="image-20240426192708192"></p>
+<p>似乎和sqlite扯上了一点关系, 先暂时不管这数据库哪来的的, 看看旁边的关键代码</p>
+<ol>
+<li>RSA解密密钥</li>
+<li>从第八位开始截断, 将后面的字符串与 <code>machineCode</code> 匹配</li>
+<li>前8位以 <code>yyyyMMdd</code> 形式, 猜测是授权到期日期</li>
+</ol>
+<p>好的, 我们获得了注册码的编码结构信息</p>
+<p>继续跟进 <code>RSADecrypt</code> 函数, 根据调用找到初始化密钥的位置</p>
+<p><img src="https://s2.loli.net/2024/04/26/5jPI26UaO8bCoxt.png" alt="image-20240426193015224"></p>
+<p><code>Field1</code> 是以xml形式编码的RSA密钥</p>
+<p>并未发现其他引用这个Field的位置, 只传给了 <code>RSADecrypt</code> 函数</p>
+<h3 id="Take-over-the-world"><a href="#Take-over-the-world" class="headerlink" title="Take over the world!"></a>Take over the world!</h3><p>我们已经获得了注册码的编码结构信息, 即 <code>yyyyMMdd机器码</code></p>
+<p>那么, 非对称加密的破解方案非常简单, 直接替换公钥再Keygen一把梭</p>
+<p>首先自己生成一份公私钥, 按照同样的编码方式编写Keygen程序用来生成授权</p>
+<p>由于目标程序被混淆保护, 直接进行修改比较复杂, 且容易一头撞到保护壳的反篡改校验上</p>
+<p>更加优雅的采用Hook方案将破解注入到目标程序中</p>
+<ol>
+<li>新建.Net DLL项目</li>
+<li>添加 <code>Lib.Harmony</code> Hook框架</li>
+<li>劫持<code>AuthorizeHelper.RSADecrypt</code> , 下<code>Prefix</code> Hook</li>
+<li>篡改第一个参数, 即RSA的密钥, 将我们生成的公钥换进去</li>
+<li>编译之, 破解补丁get</li>
+</ol>
+<p>IIS的部署方式, 需要想办法将补丁DLL注入进去, <del>虽然这样并不优雅(?</del>, 不过以简单粗暴的方式解决问题</p>
+<ol>
+<li>找一个没有上保护的依赖DLL</li>
+<li>dnSpy加载修改</li>
+<li>随便找一个一定会在校验授权前先被调用的class</li>
+<li>在 <code>.cctor()</code> 函数, 即class的static initializer中插入代码</li>
+</ol>
+<p><img src="https://s2.loli.net/2024/04/26/yEi9fLP1F7npzoX.png" alt="image-20240426193438395"></p>
+<p>启动IIS服务, 观察日志确定DLL注入成功, 获取机器码, 填入keygen, 生成授权, 导入</p>
+<p>激活成功</p>
+<h3 id="一个彩蛋"><a href="#一个彩蛋" class="headerlink" title="一个彩蛋"></a>一个彩蛋</h3><p>写完破解补丁并测试成功后, 突然发现…..</p>
+<p><img src="https://s2.loli.net/2024/04/26/2UXNTSB1ydKrRYM.png" alt="image-20240426193950068"></p>
+<p>作者把私钥也放在了 <code>Field1</code> 的xml里面</p>
+<h4 id="特喵这辈子第一次见到基于非对称加密的授权方案这么做的"><a href="#特喵这辈子第一次见到基于非对称加密的授权方案这么做的" class="headerlink" title="特喵这辈子第一次见到基于非对称加密的授权方案这么做的"></a><strong>特喵这辈子第一次见到基于非对称加密的授权方案这么做的</strong></h4><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2024-03-19</span><i class="fa fa-tag"></i><a class="tag" href="/tags/逆向/" title="逆向">逆向 </a><a class="tag" href="/tags/破解/" title="破解">破解 </a><a class="tag" href="/tags/Net/" title=".Net">.Net </a><a class="tag" href="/tags/反混淆/" title="反混淆">反混淆 </a><a class="tag" href="/tags/Hook/" title="Hook">Hook </a><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span class="visitors_counter"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2023/11/18/%E5%8E%BB%E9%99%A4%E6%9F%90IDEA%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8F%8D%E7%A0%B4%E8%A7%A3%E6%A3%80%E6%B5%8B%E6%9C%BA%E5%88%B6/" title="去除某IDEA插件的反破解检测">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><a id="comments"></a><div id="gitalk-container" style="margin: 0 30px 30px 30px;"></div><script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css"><script src="/js/md5.min.js"></script><script>const gitalk = new Gitalk({
+  clientID: '6704fe160be4c8144896',
+  clientSecret: 'f05e0417ce056a591b3cf3cd628143f3f00bb9d2',
+  repo: 'sakurakooi-blogs',      // The repository of store comments,
+  owner: 'ArukasSiteHosting',
+  admin: ['SakuraKoi'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')</script><div class="footer-mobile"><div class="footer"><div class="p"> <span>© 2021 </span><i class="fa fa-star"></i><span> SakuraKooi</span></div><div class="by_farbox"><span>Powered by </span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo </a><span> & Theme modified from </span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core  </a></div><div class="beian"><img src="/images/moeicp.png" style="height:10px;margin-left: 10px;position: relative;top: 1px;"><a href="https://icp.gov.moe/?keyword=20224987" target="_blank" style="margin-left: 2px;">萌ICP备20224987号</a></div></div></div></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script>var OriginTitile=document.title,st;
+document.addEventListener("visibilitychange",function(){
+    document.hidden ? 
+        (document.title="诶!? 不许跑喵~",clearTimeout(st)) : 
+        (document.title=OriginTitile, st=setTimeout(function(){
+            document.title=OriginTitile;
+        },3e3))
+    }
+);</script><script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script><script>particlesJS("particles", {
+    "particles": {
+      "number": {
+        "value": 95,
+        "density": {
+          "enable": true,
+          "value_area": 2446.3576890600452
+        }
+      },
+      "color": {
+        "value": "#bbbbbb"
+      },
+      "shape": {
+        "type": "polygon",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 6
+        },
+        "image": {
+          "src": "img/github.svg",
+          "width": 100,
+          "height": 100
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": false,
+        "anim": {
+          "enable": false,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 1.5,
+        "random": true,
+        "anim": {
+          "enable": false,
+          "speed": 40,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#bbbbbb",
+        "opacity": 0.6,
+        "width": 1.5
+      },
+      "move": {
+        "enable": true,
+        "speed": 2,
+        "direction": "none",
+        "random": false,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": false,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
+      }
+    },
+    "interactivity": {
+      "detect_on": "window",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "bubble"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "repulse"
+        },
+        "resize": true
+      },
+      "modes": {
+        "grab": {
+          "distance": 400,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 2,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 147.597845071462,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
+      }
+    },
+    "retina_detect": true
+  });</script></body></html>

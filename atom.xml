@@ -5,9 +5,9 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="https://blog,sakurakooi,dev/"/>
-  <updated>2023-11-18T13:16:55.414Z</updated>
-  <id>https://blog,sakurakooi,dev/</id>
+  <link href="https://blog.sakurakooi.dev/"/>
+  <updated>2024-04-26T11:48:10.085Z</updated>
+  <id>https://blog.sakurakooi.dev/</id>
   
   <author>
     <name>SakuraKooi</name>
@@ -17,9 +17,45 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>破解某ERP系统三方API接口授权验证</title>
+    <link href="https://blog.sakurakooi.dev/2024/03/19/%E7%A0%B4%E8%A7%A3%E6%9F%90ERP%E7%B3%BB%E7%BB%9F%E4%B8%89%E6%96%B9API%E6%8E%A5%E5%8F%A3%E6%8E%88%E6%9D%83%E9%AA%8C%E8%AF%81/"/>
+    <id>https://blog.sakurakooi.dev/2024/03/19/破解某ERP系统三方API接口授权验证/</id>
+    <published>2024-03-19T07:01:30.000Z</published>
+    <updated>2024-04-26T11:48:10.085Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p><strong>免责声明</strong></p><p>本文撰写目的为分享技术, 仅供学习和研究目的, 不分享破解软件</p><p>如果喜欢某个软件, 请购买正版</p></blockquote><h3 id="遇事不决Die-雾"><a href="#遇事不决Die-雾" class="headerlink" title="遇事不决Die (雾"></a>遇事不决Die (雾</h3><p>先把目标扔进 <code>DetectItEasy</code> 里查一下 <del>看看什么成分</del></p><p><img src="https://s2.loli.net/2024/04/26/wkBDX19FA8aoUcL.png" alt="image-20240426191345880"></p><p>.Net 4.0的DLL, ConfuserEx混淆</p><p>Confuser作为一个经典开源混淆, 各种修改变种花里胡哨, 比较难找到能够完全通杀的反混淆工具</p><p>首先拿去跑一遍UnconfuserEx清一清再拖进dotpeek里看, 根据api文档, 找到对应的controller看看反混淆效果怎么样</p><p><img src="https://s2.loli.net/2024/04/26/2J5emTzSNrOskcu.png" alt="image-20240426191423502"></p><p>似乎仍然有混淆没解开, 看看这几个StaticMethod</p><h3 id="处理字符串加密"><a href="#处理字符串加密" class="headerlink" title="处理字符串加密"></a>处理字符串加密</h3><p><img src="https://s2.loli.net/2024/04/26/gteK1RGqzY2EVHP.png" alt="image-20240426191513893"></p><p>一眼比较简单的字符串池类加密, 同时把 <code>int</code> 和 <code>byte[]</code> 也塞到池里一起混着存了, 根据参数传的key从池中取对应位置然后解密</p><p>修改UnconfuserEx的源代码, 增加一个transformer来处理掉它</p><p>大致处理流程如下</p><ol><li>使用 <code>Assembly.LoadFile</code> 加载目标DLL</li><li>直接逐个扫描method body, 收集所有的key和对应的解密函数</li><li>挨个 <code>Module.ResolveMethod</code> 然后 <code>MethodBase.Invoke</code> 拿到解密函数返回的结果</li><li>将解密后的字符串替换回原位置</li></ol><p>虽然这样并不优雅, 但对各类算法变异通杀效果好, 至于安全性…拽进Windows Sandbox跑 (点头</p><blockquote><p>对这类字符串加密算法的改进可以考虑往上爬调用栈, 确保是来自于预期的地方的call</p><p>或者干脆把采用调用来源的某些特征作为解密密钥, 可以有效防止咱这样的直接call解密</p><p>当然…你跟踪调用栈…咱也可以模拟调用栈</p><p>所以,  <del>有效, 但有那么一点点</del> </p></blockquote><p><img src="https://s2.loli.net/2024/04/26/jXqfxYI5Ni6O3m9.png" alt="image-20240426191820431"></p><p>进行一个反混淆的跑, 将反混淆后的DLL再次反编译, 字符串已解密</p><p>还有一大堆奇奇怪怪的StaticMethod, 现在来处理掉它们</p><h3 id="处理-InvokeProxy-混淆"><a href="#处理-InvokeProxy-混淆" class="headerlink" title="处理 InvokeProxy 混淆"></a>处理 InvokeProxy 混淆</h3><p><img src="https://s2.loli.net/2024/04/26/zVFAgOQyX8EBotx.png" alt="image-20240426192037719"></p><p>在反编译的代码中可以看到大量的这类函数及其调用, 特征鲜明的InvokeProxy类混淆</p><p>此类混淆的目的是掩盖调用目标, 将一目了然的调用转换为乱七八糟不知道在call什么的调用, 干扰逆向者理解代码</p><p><img src="https://s2.loli.net/2024/04/26/yMaWJpT6RKfxsjl.png" alt="image-20240426192235627"></p><p>IL码可以看到较为明显的特征, 即 <code>使用ldarg将所有参数逐个压栈后执行实际操作, 再ret回去</code></p><p>同样修改UnconfuserEx的源代码, 增加一个transformer对此类混淆进行处理</p><p>大致反混淆流程如下:</p><ol><li>根据特征识别代理函数</li><li>取出 <code>ldarg后的第一条指令</code>, 即执行的实际操作</li><li>扫描所有method, 寻找call代理函数的位置</li><li>把实际操作的指令替换回被代理的原位置</li></ol><blockquote><p>至少来个乱序压栈再重新摆正吧 (碎碎念</p></blockquote><p><img src="https://s2.loli.net/2024/04/26/Zg2qacdEDlReBPI.png" alt="image-20240426192413635"></p><p>再次进行一个反混淆的跑, 反编译可见代码逻辑已经很清晰了</p><h3 id="开始分析"><a href="#开始分析" class="headerlink" title="开始分析"></a>开始分析</h3><p>首先跟踪到<code>Field4.GetMachineCode()</code>即<code>IAuthorizeHelper.GetMachineCode()</code></p><p>查找Implementation定位到<code>AuthorizeHelper.GetMachineCode()</code></p><p><img src="https://s2.loli.net/2024/04/26/lV4HiJGoEjAUgDC.png" alt="image-20240426192611845"></p><p>CpuId加密, Encrypt是简单的des算法, 没什么看头, 对 <code>GetMachineCode</code> 查找引用</p><p><img src="https://s2.loli.net/2024/04/26/FWCSUArXlvKiPd9.png" alt="image-20240426192641850"></p><p>发现了似乎是判断激活的关键函数</p><p><img src="https://s2.loli.net/2024/04/26/XG56LB7s2PjoChM.png" alt="image-20240426192651811"></p><p>向下翻找变量 <code>machineCode</code> 的引用</p><p><img src="https://s2.loli.net/2024/04/26/APrDRkNJEzp7U2y.png" alt="image-20240426192708192"></p><p>似乎和sqlite扯上了一点关系, 先暂时不管这数据库哪来的的, 看看旁边的关键代码</p><ol><li>RSA解密密钥</li><li>从第八位开始截断, 将后面的字符串与 <code>machineCode</code> 匹配</li><li>前8位以 <code>yyyyMMdd</code> 形式, 猜测是授权到期日期</li></ol><p>好的, 我们获得了注册码的编码结构信息</p><p>继续跟进 <code>RSADecrypt</code> 函数, 根据调用找到初始化密钥的位置</p><p><img src="https://s2.loli.net/2024/04/26/5jPI26UaO8bCoxt.png" alt="image-20240426193015224"></p><p><code>Field1</code> 是以xml形式编码的RSA密钥</p><p>并未发现其他引用这个Field的位置, 只传给了 <code>RSADecrypt</code> 函数</p><h3 id="Take-over-the-world"><a href="#Take-over-the-world" class="headerlink" title="Take over the world!"></a>Take over the world!</h3><p>我们已经获得了注册码的编码结构信息, 即 <code>yyyyMMdd机器码</code></p><p>那么, 非对称加密的破解方案非常简单, 直接替换公钥再Keygen一把梭</p><p>首先自己生成一份公私钥, 按照同样的编码方式编写Keygen程序用来生成授权</p><p>由于目标程序被混淆保护, 直接进行修改比较复杂, 且容易一头撞到保护壳的反篡改校验上</p><p>更加优雅的采用Hook方案将破解注入到目标程序中</p><ol><li>新建.Net DLL项目</li><li>添加 <code>Lib.Harmony</code> Hook框架</li><li>劫持<code>AuthorizeHelper.RSADecrypt</code> , 下<code>Prefix</code> Hook</li><li>篡改第一个参数, 即RSA的密钥, 将我们生成的公钥换进去</li><li>编译之, 破解补丁get</li></ol><p>IIS的部署方式, 需要想办法将补丁DLL注入进去, <del>虽然这样并不优雅(?</del>, 不过以简单粗暴的方式解决问题</p><ol><li>找一个没有上保护的依赖DLL</li><li>dnSpy加载修改</li><li>随便找一个一定会在校验授权前先被调用的class</li><li>在 <code>.cctor()</code> 函数, 即class的static initializer中插入代码</li></ol><p><img src="https://s2.loli.net/2024/04/26/yEi9fLP1F7npzoX.png" alt="image-20240426193438395"></p><p>启动IIS服务, 观察日志确定DLL注入成功, 获取机器码, 填入keygen, 生成授权, 导入</p><p>激活成功</p><h3 id="一个彩蛋"><a href="#一个彩蛋" class="headerlink" title="一个彩蛋"></a>一个彩蛋</h3><p>写完破解补丁并测试成功后, 突然发现…..</p><p><img src="https://s2.loli.net/2024/04/26/2UXNTSB1ydKrRYM.png" alt="image-20240426193950068"></p><p>作者把私钥也放在了 <code>Field1</code> 的xml里面</p><h4 id="特喵这辈子第一次见到基于非对称加密的授权方案这么做的"><a href="#特喵这辈子第一次见到基于非对称加密的授权方案这么做的" class="headerlink" title="特喵这辈子第一次见到基于非对称加密的授权方案这么做的"></a><strong>特喵这辈子第一次见到基于非对称加密的授权方案这么做的</strong></h4><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;免责声明&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;本文撰写目的为分享技术, 仅供学习和研究目的, 不分享破解软件&lt;/p&gt;
+&lt;p&gt;如果喜欢某个软件, 请购买正版&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;遇事不决Die-雾&quot;&gt;&lt;a 
+      
+    
+    </summary>
+    
+    
+      <category term="逆向" scheme="https://blog.sakurakooi.dev/tags/%E9%80%86%E5%90%91/"/>
+    
+      <category term="破解" scheme="https://blog.sakurakooi.dev/tags/%E7%A0%B4%E8%A7%A3/"/>
+    
+      <category term=".Net" scheme="https://blog.sakurakooi.dev/tags/Net/"/>
+    
+      <category term="反混淆" scheme="https://blog.sakurakooi.dev/tags/%E5%8F%8D%E6%B7%B7%E6%B7%86/"/>
+    
+      <category term="Hook" scheme="https://blog.sakurakooi.dev/tags/Hook/"/>
+    
+  </entry>
+  
+  <entry>
     <title>去除某IDEA插件的反破解检测</title>
-    <link href="https://blog,sakurakooi,dev/2023/11/18/%E5%8E%BB%E9%99%A4%E6%9F%90IDEA%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8F%8D%E7%A0%B4%E8%A7%A3%E6%A3%80%E6%B5%8B%E6%9C%BA%E5%88%B6/"/>
-    <id>https://blog,sakurakooi,dev/2023/11/18/去除某IDEA插件的反破解检测机制/</id>
+    <link href="https://blog.sakurakooi.dev/2023/11/18/%E5%8E%BB%E9%99%A4%E6%9F%90IDEA%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8F%8D%E7%A0%B4%E8%A7%A3%E6%A3%80%E6%B5%8B%E6%9C%BA%E5%88%B6/"/>
+    <id>https://blog.sakurakooi.dev/2023/11/18/去除某IDEA插件的反破解检测机制/</id>
     <published>2023-11-18T11:35:35.000Z</published>
     <updated>2023-11-18T13:16:55.414Z</updated>
     
@@ -35,18 +71,18 @@
     </summary>
     
     
-      <category term="Java" scheme="https://blog,sakurakooi,dev/tags/Java/"/>
+      <category term="Java" scheme="https://blog.sakurakooi.dev/tags/Java/"/>
     
-      <category term="逆向" scheme="https://blog,sakurakooi,dev/tags/%E9%80%86%E5%90%91/"/>
+      <category term="逆向" scheme="https://blog.sakurakooi.dev/tags/%E9%80%86%E5%90%91/"/>
     
-      <category term="破解" scheme="https://blog,sakurakooi,dev/tags/%E7%A0%B4%E8%A7%A3/"/>
+      <category term="破解" scheme="https://blog.sakurakooi.dev/tags/%E7%A0%B4%E8%A7%A3/"/>
     
   </entry>
   
   <entry>
     <title>Xposed模块 资源注入</title>
-    <link href="https://blog,sakurakooi,dev/2023/08/23/Xposed%E6%A8%A1%E5%9D%97-%E8%B5%84%E6%BA%90%E6%B3%A8%E5%85%A5/"/>
-    <id>https://blog,sakurakooi,dev/2023/08/23/Xposed模块-资源注入/</id>
+    <link href="https://blog.sakurakooi.dev/2023/08/23/Xposed%E6%A8%A1%E5%9D%97-%E8%B5%84%E6%BA%90%E6%B3%A8%E5%85%A5/"/>
+    <id>https://blog.sakurakooi.dev/2023/08/23/Xposed模块-资源注入/</id>
     <published>2023-08-23T13:19:34.000Z</published>
     <updated>2023-08-23T15:00:21.871Z</updated>
     
@@ -62,16 +98,16 @@
     </summary>
     
     
-      <category term="Android" scheme="https://blog,sakurakooi,dev/tags/Android/"/>
+      <category term="Android" scheme="https://blog.sakurakooi.dev/tags/Android/"/>
     
-      <category term="Xposed" scheme="https://blog,sakurakooi,dev/tags/Xposed/"/>
+      <category term="Xposed" scheme="https://blog.sakurakooi.dev/tags/Xposed/"/>
     
   </entry>
   
   <entry>
     <title>源码编译GNU Screen笔记</title>
-    <link href="https://blog,sakurakooi,dev/2023/06/20/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91GNU-Screen%E7%AC%94%E8%AE%B0/"/>
-    <id>https://blog,sakurakooi,dev/2023/06/20/源码编译GNU-Screen笔记/</id>
+    <link href="https://blog.sakurakooi.dev/2023/06/20/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91GNU-Screen%E7%AC%94%E8%AE%B0/"/>
+    <id>https://blog.sakurakooi.dev/2023/06/20/源码编译GNU-Screen笔记/</id>
     <published>2023-06-20T06:10:59.000Z</published>
     <updated>2023-06-23T13:55:47.345Z</updated>
     
@@ -87,14 +123,14 @@
     </summary>
     
     
-      <category term="Linux" scheme="https://blog,sakurakooi,dev/tags/Linux/"/>
+      <category term="Linux" scheme="https://blog.sakurakooi.dev/tags/Linux/"/>
     
   </entry>
   
   <entry>
     <title>C++ 强制启用 Windows 10 暗色标题栏</title>
-    <link href="https://blog,sakurakooi,dev/2022/10/28/C++%E5%BC%BA%E5%88%B6%E5%90%AF%E7%94%A8Win10%E6%9A%97%E8%89%B2%E6%A0%87%E9%A2%98%E6%A0%8F/"/>
-    <id>https://blog,sakurakooi,dev/2022/10/28/C++强制启用Win10暗色标题栏/</id>
+    <link href="https://blog.sakurakooi.dev/2022/10/28/C++%E5%BC%BA%E5%88%B6%E5%90%AF%E7%94%A8Win10%E6%9A%97%E8%89%B2%E6%A0%87%E9%A2%98%E6%A0%8F/"/>
+    <id>https://blog.sakurakooi.dev/2022/10/28/C++强制启用Win10暗色标题栏/</id>
     <published>2022-10-28T12:37:11.000Z</published>
     <updated>2022-11-14T15:11:13.404Z</updated>
     
@@ -110,18 +146,18 @@
     </summary>
     
     
-      <category term="Windows" scheme="https://blog,sakurakooi,dev/tags/Windows/"/>
+      <category term="Windows" scheme="https://blog.sakurakooi.dev/tags/Windows/"/>
     
-      <category term="C++" scheme="https://blog,sakurakooi,dev/tags/C/"/>
+      <category term="C++" scheme="https://blog.sakurakooi.dev/tags/C/"/>
     
-      <category term="暗色模式" scheme="https://blog,sakurakooi,dev/tags/%E6%9A%97%E8%89%B2%E6%A8%A1%E5%BC%8F/"/>
+      <category term="暗色模式" scheme="https://blog.sakurakooi.dev/tags/%E6%9A%97%E8%89%B2%E6%A8%A1%E5%BC%8F/"/>
     
   </entry>
   
   <entry>
     <title>记Spring使用yml配置文件时连接数据库的一个坑</title>
-    <link href="https://blog,sakurakooi,dev/2022/05/14/%E8%AE%B0Spring%E4%BD%BF%E7%94%A8yml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%97%B6%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
-    <id>https://blog,sakurakooi,dev/2022/05/14/记Spring使用yml配置文件时连接数据库的一个坑/</id>
+    <link href="https://blog.sakurakooi.dev/2022/05/14/%E8%AE%B0Spring%E4%BD%BF%E7%94%A8yml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%97%B6%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/"/>
+    <id>https://blog.sakurakooi.dev/2022/05/14/记Spring使用yml配置文件时连接数据库的一个坑/</id>
     <published>2022-05-14T09:18:46.000Z</published>
     <updated>2022-05-14T09:21:43.510Z</updated>
     
@@ -137,18 +173,18 @@
     </summary>
     
     
-      <category term="Java" scheme="https://blog,sakurakooi,dev/tags/Java/"/>
+      <category term="Java" scheme="https://blog.sakurakooi.dev/tags/Java/"/>
     
-      <category term="SpringBoot" scheme="https://blog,sakurakooi,dev/tags/SpringBoot/"/>
+      <category term="SpringBoot" scheme="https://blog.sakurakooi.dev/tags/SpringBoot/"/>
     
-      <category term="Mysql" scheme="https://blog,sakurakooi,dev/tags/Mysql/"/>
+      <category term="Mysql" scheme="https://blog.sakurakooi.dev/tags/Mysql/"/>
     
   </entry>
   
   <entry>
     <title>记Windows编译sentry-native集成Qt</title>
-    <link href="https://blog,sakurakooi,dev/2022/04/06/%E8%AE%B0Windows%E7%BC%96%E8%AF%91sentry-native%E9%9B%86%E6%88%90qt/"/>
-    <id>https://blog,sakurakooi,dev/2022/04/06/记Windows编译sentry-native集成qt/</id>
+    <link href="https://blog.sakurakooi.dev/2022/04/06/%E8%AE%B0Windows%E7%BC%96%E8%AF%91sentry-native%E9%9B%86%E6%88%90qt/"/>
+    <id>https://blog.sakurakooi.dev/2022/04/06/记Windows编译sentry-native集成qt/</id>
     <published>2022-04-06T05:33:31.000Z</published>
     <updated>2022-04-06T05:33:52.255Z</updated>
     
@@ -164,20 +200,20 @@
     </summary>
     
     
-      <category term="Windows" scheme="https://blog,sakurakooi,dev/tags/Windows/"/>
+      <category term="Windows" scheme="https://blog.sakurakooi.dev/tags/Windows/"/>
     
-      <category term="C++" scheme="https://blog,sakurakooi,dev/tags/C/"/>
+      <category term="C++" scheme="https://blog.sakurakooi.dev/tags/C/"/>
     
-      <category term="Qt" scheme="https://blog,sakurakooi,dev/tags/Qt/"/>
+      <category term="Qt" scheme="https://blog.sakurakooi.dev/tags/Qt/"/>
     
-      <category term="Sentry" scheme="https://blog,sakurakooi,dev/tags/Sentry/"/>
+      <category term="Sentry" scheme="https://blog.sakurakooi.dev/tags/Sentry/"/>
     
   </entry>
   
   <entry>
     <title>Android 实现每天早上关闭指纹解锁 强制使用图案或密码</title>
-    <link href="https://blog,sakurakooi,dev/2022/01/30/Android-%E5%AE%9E%E7%8E%B0%E6%AF%8F%E5%A4%A9%E6%97%A9%E4%B8%8A%E5%85%B3%E9%97%AD%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81-%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E5%9B%BE%E6%A1%88%E6%88%96%E5%AF%86%E7%A0%81/"/>
-    <id>https://blog,sakurakooi,dev/2022/01/30/Android-实现每天早上关闭指纹解锁-强制使用图案或密码/</id>
+    <link href="https://blog.sakurakooi.dev/2022/01/30/Android-%E5%AE%9E%E7%8E%B0%E6%AF%8F%E5%A4%A9%E6%97%A9%E4%B8%8A%E5%85%B3%E9%97%AD%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81-%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E5%9B%BE%E6%A1%88%E6%88%96%E5%AF%86%E7%A0%81/"/>
+    <id>https://blog.sakurakooi.dev/2022/01/30/Android-实现每天早上关闭指纹解锁-强制使用图案或密码/</id>
     <published>2022-01-30T00:52:09.000Z</published>
     <updated>2022-01-31T04:40:03.205Z</updated>
     
@@ -193,16 +229,16 @@
     </summary>
     
     
-      <category term="Android" scheme="https://blog,sakurakooi,dev/tags/Android/"/>
+      <category term="Android" scheme="https://blog.sakurakooi.dev/tags/Android/"/>
     
-      <category term="隐私" scheme="https://blog,sakurakooi,dev/tags/%E9%9A%90%E7%A7%81/"/>
+      <category term="隐私" scheme="https://blog.sakurakooi.dev/tags/%E9%9A%90%E7%A7%81/"/>
     
   </entry>
   
   <entry>
     <title>Hello World</title>
-    <link href="https://blog,sakurakooi,dev/2022/01/03/hello-world/"/>
-    <id>https://blog,sakurakooi,dev/2022/01/03/hello-world/</id>
+    <link href="https://blog.sakurakooi.dev/2022/01/03/hello-world/"/>
+    <id>https://blog.sakurakooi.dev/2022/01/03/hello-world/</id>
     <published>2022-01-03T08:14:17.852Z</published>
     <updated>2022-01-16T11:27:40.548Z</updated>
     
