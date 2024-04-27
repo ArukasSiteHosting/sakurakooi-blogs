@@ -21,8 +21,14 @@
 <ul>
 <li>修改JDBC Url, 带参数 <code>AUTO_SERVER_PORT=端口号</code> 连接数据库</li>
 <li>读取 <code>.lock.db</code> , 使用id字段的值作为 <code>serverKey</code></li>
-<li>使用 <code>jdbc:h2:tcp://&lt;address&gt;:&lt;port&gt;/&lt;serverKey&gt;</code> 连接数据库</li>
+<li>使用 <code>jdbc:h2:tcp://&lt;address&gt;:&lt;port&gt;/&lt;serverKey&gt;</code> 通过网络访问数据库</li>
 </ul>
+<blockquote>
+<p> 需要注意的是 <code>serverKey</code> 是一个随机密钥, 在每次daemon thread启动时都会更换</p>
+<p>因此该方法不适用于经常需要远程连接数据库的情景</p>
+<p>在偶尔可能需要远程看看数据, 大部分情况下仅由本地程序访问的情况下还是比较合适的</p>
+<p>能省掉一个单独跑着的H2 Server, 降低业务服务对外部环境的依赖性</p>
+</blockquote>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2024-04-26</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Java/" title="Java">Java </a><a class="tag" href="/tags/笔记/" title="笔记">笔记 </a><a class="tag" href="/tags/数据库/" title="数据库">数据库 </a><a class="tag" href="/tags/H2/" title="H2">H2 </a><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span class="visitors_counter"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2024/03/19/%E7%A0%B4%E8%A7%A3%E6%9F%90ERP%E7%B3%BB%E7%BB%9F%E4%B8%89%E6%96%B9API%E6%8E%A5%E5%8F%A3%E6%8E%88%E6%9D%83%E9%AA%8C%E8%AF%81/" title="破解某ERP系统三方API接口授权验证">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><a id="comments"></a><div id="gitalk-container" style="margin: 0 30px 30px 30px;"></div><script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css"><script src="/js/md5.min.js"></script><script>const gitalk = new Gitalk({
   clientID: '6704fe160be4c8144896',
   clientSecret: 'f05e0417ce056a591b3cf3cd628143f3f00bb9d2',
